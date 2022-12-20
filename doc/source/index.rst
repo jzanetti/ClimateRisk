@@ -1,10 +1,7 @@
 Welcome to ClimateRisk
 ===================================
 
-.. image:: shiny_aws_logo.PNG
-   :width: 450
-
-**ClimateRisk**is an open-source repository that conducts climate risk 
+**ClimateRisk** is an open-source repository that conducts climate risk 
 and adaptation analysis, focusing on the New Zealand transportation sector.
 
 .. note::
