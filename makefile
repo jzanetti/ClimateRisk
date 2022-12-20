@@ -7,6 +7,7 @@ override PKG = climaterisk
 override CONDA_ACTIVATE = source $$(conda info --base)/etc/profile.d/conda.sh ; conda activate ; conda activate
 
 help:
+	@echo "set conda_base, e.g., export CONDA_BASE=/Users/zhans/miniconda3"
 	@echo "current conda_base: $(CONDA_BASE)"
 	@echo "current conda: $(CONDA)"
 	@echo "- install climaterisk: make all"
@@ -29,10 +30,10 @@ clear_all:
 	$(CONDA) index $(CONDA_BASE)/conda-bld
 
 env: clear_env
+	rm -rf /tmp/$(PKG)
 	mkdir -p /tmp/$(PKG)
-	git clone https://github.com/CLIMADA-project/climada_python.git /tmp/$(PKG)/climada_python
-	cd /tmp/$(PKG); git checkout develop
-	conda env create -n $(PKG) -f /tmp/$(PKG)/requirements/env_climada.yml
-	cd /tmp; pip install -e $(PKG)
+	curl -o /tmp/$(PKG)/env_climada.yml https://raw.githubusercontent.com/CLIMADA-project/climada_python/main/requirements/env_climada.yml
+	conda env create -n $(PKG) -f /tmp/$(PKG)/env_climada.yml
+	conda activate $(PKG); $(CONDA_BASE)/envs/$(PKG)/bin/pip install climada
 
 all: env

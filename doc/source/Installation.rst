@@ -22,7 +22,7 @@ After ``conda``, **ClimateRisk** can be simply installed with the provided ``mak
 .. code-block:: bash
 
    export CONDA_BASE=<CONDA PATH>
-   sudo -E make all
+   make all
 
 where ``CONDA_BASE`` is the path where the ``conda`` package is installed. For example, we can have ``export CONDA_BASE=~/Programs/miniconda3/``.
 
