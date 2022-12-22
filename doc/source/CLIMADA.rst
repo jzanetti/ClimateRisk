@@ -10,7 +10,7 @@ Basics
 - **Exposure**: it describes the set of assets, people, livelihoods, infrastructures, etc. within an area of interest 
                 in terms of their geographic location, their value etc.; in brief - everything potentially exposed to hazards.
                 **Exposure** can be represented by **LitPop**, which is used to initiate grided exposure data (with estimates of either asset value, economic activity or population) 
-                based on nightlight intensity and population count data.
+                based on nightlight intensity (*Lit*) and population count (*Pop*) data.
 
 
 
