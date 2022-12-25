@@ -1,8 +1,54 @@
 from climada.hazard import TCTracks, TropCyclone, Centroids
 from process.vis import plot_tc
 from climada.hazard.tc_tracks import TCTracks as TCTracks_type
-from process.utils import gdf2centroids
+from process.utils import gdf2centroids, str2list_for_year
 from climada.entity.exposures.base import Exposures
+
+
+def get_hazard(hazard_cfg: dict) -> dict:
+    """Get hazard
+
+    Args:
+        hazard_cfg (dict): Hazard configuration
+
+    Raises:
+        Exception: _description_
+
+    Returns:
+        dict: Hazard information
+    """
+
+    hazards = {}
+
+    for proc_hazard_name in hazard_cfg:
+
+        proc_hazard_cfg = hazard_cfg[proc_hazard_name]
+
+        if not proc_hazard_cfg["enable"]:
+            continue
+
+        if proc_hazard_name == "TC":
+
+            # Load histrocial tropical cyclone tracks from ibtracs over the North Atlantic basin between 2010-2012
+            ibtracks_na = TCTracks.from_ibtracs_netcdf(
+                provider=proc_hazard_cfg["provider"], 
+                year_range=str2list_for_year(proc_hazard_cfg["year_range"]), 
+                estimate_missing=True)
+
+            # Interpolation to make the track smooth and to allow applying calc_perturbed_trajectories
+            ibtracks_na.equal_timestep(0.5)
+
+            # Add randomly generated tracks using the calc_perturbed_trajectories method (1 per historical track)
+            ibtracks_na.calc_perturbed_trajectories(
+                nb_synth_tracks=proc_hazard_cfg["pert_tracks"])
+
+            hazards[proc_hazard_name] = ibtracks_na
+
+        else:
+            raise Exception("fHazard type {proc_hazard_name} is not supported yet")
+
+    return hazards
+
 
 def get_tc(
     workdir: str, 
@@ -37,9 +83,11 @@ def get_tc(
         plot_tc(workdir, ibtracks_na)
 
     # Define the centroids from the exposures position
-    exp_centroids = gdf2centroids(exposure_obj.gdf)
+    exp_centroids = gdf2centroids(exposure_obj["exposure_obj"].gdf)
 
     # Using the tracks, compute the windspeed at the location of the centroids
     tc = TropCyclone.from_tracks(ibtracks_na, centroids=exp_centroids)
 
     return tc
+
+    

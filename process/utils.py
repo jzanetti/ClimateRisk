@@ -4,6 +4,38 @@ from climada.hazard import Centroids
 from climada.hazard.centroids.centr import Centroids as Centroids_type
 from climada.entity.impact_funcs import impact_func_set
 
+from yaml import safe_load
+from geopandas import read_file as geopandas_read_file
+from geopandas.geodataframe import GeoDataFrame
+
+
+def str2list_for_year(str_input: str or None) -> list:
+    """Convert str (e.g., 2011-2012) to a list (e.g., [2011, 2012])
+
+    Args:
+        str_input (str): year range, e.g., 2011-2012
+
+    Returns:
+        list: year range in a list
+    """
+
+    if str_input is None:
+        return None
+
+    str_input = str_input.split("-")
+
+    return [int(i) for i in str_input]
+
+
+def read_basemap(base_map_path: str) -> GeoDataFrame:
+    """Read basemap
+
+    Returns:
+        _type_: _description_
+    """
+    return geopandas_read_file(base_map_path)
+
+
 def gdf2centroids(gdf: DataFrame) -> Centroids_type:
     """Return centroids from pandas Datatfame
 
@@ -34,3 +66,18 @@ def get_hazard_info(impf_set: impact_func_set) -> dict:
         "haz_type": haz_type,
         "haz_id": haz_id
     }
+
+
+def read_cfg(cfg_path: str) -> dict:
+    """Read configuration file
+
+    Args:
+        cfg_path (str): configuration path
+
+    Returns:
+        dict: dict contains all configurations
+    """
+    with open(cfg_path, "r") as fid:
+        cfg = safe_load(fid)
+    
+    return cfg

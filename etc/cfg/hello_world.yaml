@@ -1,0 +1,37 @@
+exp_name: hello_world
+
+input:
+  file: exp/hello_world/nz-state-highway-centrelines-2012-SHP/nz-state-highway-centrelines-2012.shp
+  geometry_type: line # line or point
+  value_adjustment_option: 
+    litpop: false
+    fix: 300.0
+
+impact:
+  func: 
+    - from_emanuel_usa
+
+hazard:
+  TC:
+    enable: True
+    year_range: null # 2010-2012 or null
+    provider: wellington
+    pert_tracks: 1
+
+vis:
+  basemap: etc/data/nz-coastlines-and-islands-polygons-topo-150k.shp
+  exposure:
+    enable: False
+  hazard:
+    enable: False
+  impact:
+    enable: True
+
+
+
+
+
+
+
+
+    

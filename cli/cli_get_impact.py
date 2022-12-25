@@ -13,11 +13,13 @@ Debug:
 """
 
 import argparse
-from process.exposure import get_litpop
-from process.hazard import get_tc
-from process.impact import get_impact_func, calculate_impact_func
+from process.exposure import get_exposure, update_exposure
+from process.hazard import get_hazard
+from process.impact import get_impact, calculate_impact_func
 from os.path import exists
 from os import makedirs
+from process.utils import read_cfg
+from process.vis import plot_wrapper
 
 def get_example_usage():
     example_text = """example:
@@ -39,9 +41,15 @@ def setup_parser():
         required=True,
         help="working directory")
 
+    parser.add_argument(
+        "--cfg",
+        required=True,
+        help="the path of configuration file")
+
     return parser.parse_args(
         [
             "--workdir", "/tmp/climaterisk",
+            "--cfg", "etc/cfg/hello_world.yaml"
         ]
     )
 
@@ -50,17 +58,28 @@ def get_data():
     args = setup_parser()
 
     workdir = args.workdir
+    cfg = read_cfg(args.cfg)
 
     if not exists(workdir):
         makedirs(workdir)
 
-    impact_func = get_impact_func(["from_emanuel_usa"])
+    print("Get exposures ...")
+    exp_obj = get_exposure(cfg["input"]["file"])
 
-    litpop_obj = get_litpop(workdir, impact_func)
+    print("Get hazard ...")
+    hazards = get_hazard(cfg["hazard"]) 
 
-    tc_obj = get_tc(workdir, litpop_obj)
+    print("Obtain impact based on hazard...")
+    impacts = get_impact(cfg["hazard"], cfg["impact"])
 
-    impact = calculate_impact_func(workdir, litpop_obj, impact_func, tc_obj, vis_flag=True)
+    print("Combining exposure, impact and hazard ...")
+    exp_objs = update_exposure(cfg, exp_obj, impacts, hazards)
+
+    print("Calculating impacts ...")
+    exp_objs = calculate_impact_func(exp_objs, cfg["input"]["geometry_type"])
+
+    print("Visualization ...")
+    plot_wrapper(cfg, workdir, exp_objs)
 
 if __name__ == "__main__":
     get_data()

@@ -1,6 +1,6 @@
-DOMAIN = {
-    "country": "New Zealand",
-    "lats": [-48.0, -28.0],
-    "lons": [160.0, 180.0]
-}
-
+#DOMAIN = {
+#    "country": "New Zealand",
+#}
+#
+#NZ_BDY_PATH = "etc/data/nz-coastlines-and-islands-polygons-topo-150k.shp"
+LITPOP_DOMAIN = "New Zealand"
