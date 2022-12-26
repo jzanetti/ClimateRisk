@@ -2,7 +2,7 @@ from climada.util.api_client import Client
 from process import LITPOP_DOMAIN
 from climada.entity.exposures.base import Exposures
 from process.vis import plot_exposure
-from process.utils import get_hazard_info
+from process.utils import get_hazard_info, check_exposure_value
 from climada.entity.impact_funcs import impact_func_set
 from geopandas import read_file
 import climada.util.lines_polys_handler as u_lp
@@ -49,36 +49,23 @@ def apply_litpop_to_exposure(exp_obj: GeoDataFrame, litpop_obj: GeoDataFrame) ->
     return gdf
 
 
-def get_exposure(input_file: str) -> Exposures:
+def get_exposure(input_cfg: dict) -> Exposures:
     """Get exposure object
 
     Args:
-        input_file (str): input file path
+        input_cfg (str): input configuration
 
     Returns:
         dict: exposure object and type
     """
-    if input_file.endswith("shp"):
-        exp_obj = get_from_shp(input_file)
-
-        #if cfg["vis"]["exposure"]["enable"]:
-        #    plot_exposure(workdir, exp_obj, basemap)
+    if input_cfg["file"].endswith("shp"):
+        exp_obj = get_from_shp(input_cfg["file"])
 
     else:
         raise Exception("input file type is not supported yet")
 
     return exp_obj
 
-"""
-def combine_exposure_with_hazard(exp_objs: dict, hazards: dict):
-    # Define the centroids from the exposures position
-
-    for hazard_name in 
-    exp_centroids = gdf2centroids(exposure_obj["exposure_obj"].gdf)
-
-    # Using the tracks, compute the windspeed at the location of the centroids
-    tc = TropCyclone.from_tracks(ibtracks_na, centroids=exp_centroids)
-"""
 
 
 
@@ -96,6 +83,8 @@ def update_exposure(cfg: dict, exp_obj: Exposures, impacts: dict, hazards: dict)
 
     outputs = {}
 
+    check_exposure_value(cfg["input"]["value_adjustment_option"])
+
     for hazard_name in impacts:
 
         if cfg["input"]["value_adjustment_option"]["litpop"]:
@@ -107,19 +96,25 @@ def update_exposure(cfg: dict, exp_obj: Exposures, impacts: dict, hazards: dict)
             )
             exp_obj.gdf = apply_litpop_to_exposure(exp_obj.gdf, litpop_obj.gdf)
 
+        if cfg["input"]["value_adjustment_option"]["fix"]:
+            exp_obj.gdf.value = cfg["input"]["value_adjustment_option"]["fix"]
+
         exposure_obj = assign_impact(exp_obj, impacts[hazard_name])
         
         exp_centroids = gdf2centroids(exposure_obj.gdf)
         
         if hazard_name == "TC":
             update_hazard = TropCyclone.from_tracks(hazards[hazard_name], centroids=exp_centroids)
+        elif hazard_name == "landslide":
+            update_hazard = hazards[hazard_name]
         else:
             raise Exception(f"Hazard {hazard_name} is not supported yet ...")
 
         outputs[hazard_name] = {
             "exposure": exposure_obj,
             "impact": impacts[hazard_name],
-            "hazard": update_hazard
+            "updated_hazard": update_hazard,
+            "hazard": hazards[hazard_name]
         }
 
     return outputs

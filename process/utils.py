@@ -81,3 +81,23 @@ def read_cfg(cfg_path: str) -> dict:
         cfg = safe_load(fid)
     
     return cfg
+
+def check_exposure_value(value_adjustment_option: dict) -> bool:
+    """Make sure exposure value adjutsment is right
+
+    Args:
+        value_adjustment_option (dict): _description_
+
+    Raises:
+        Exception: _description_
+
+    Returns:
+        bool: _description_
+    """
+    if value_adjustment_option["fix"] and value_adjustment_option["litpop"]:
+        raise Exception("value adjustments (fix, litpop) are both set to True")
+
+    return True
+
+
+

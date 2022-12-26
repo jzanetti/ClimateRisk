@@ -1,0 +1,33 @@
+name: nz_state_highway
+
+input:
+  file: etc/data/nz-state-highway-centrelines-2012-SHP/nz-state-highway-centrelines-2012.shp
+  value_adjustment_option: 
+    litpop: false
+    fix: 4500000
+
+hazard:
+  landslide:
+    enable: True
+  TC:
+    enable: False
+    year_range: null # 2010-2012 or null
+    pert_tracks: 1
+
+vis:
+  basemap: etc/data/nz_coastlines/nz-coastlines-and-islands-polygons-topo-150k.shp
+  exposure:
+    enable: False
+  hazard:
+    enable: False
+  impact:
+    enable: True
+
+
+
+
+
+
+
+
+    

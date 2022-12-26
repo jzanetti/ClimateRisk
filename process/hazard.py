@@ -3,7 +3,10 @@ from process.vis import plot_tc
 from climada.hazard.tc_tracks import TCTracks as TCTracks_type
 from process.utils import gdf2centroids, str2list_for_year
 from climada.entity.exposures.base import Exposures
-
+from os import remove
+from process import LANDSLIDE_DATA, TC_PROVIDOR
+from geopandas import read_file
+from process.climada_petals.landslide import Landslide
 
 def get_hazard(hazard_cfg: dict) -> dict:
     """Get hazard
@@ -31,7 +34,7 @@ def get_hazard(hazard_cfg: dict) -> dict:
 
             # Load histrocial tropical cyclone tracks from ibtracs over the North Atlantic basin between 2010-2012
             ibtracks_na = TCTracks.from_ibtracs_netcdf(
-                provider=proc_hazard_cfg["provider"], 
+                provider=TC_PROVIDOR, 
                 year_range=str2list_for_year(proc_hazard_cfg["year_range"]), 
                 estimate_missing=True)
 
@@ -43,6 +46,10 @@ def get_hazard(hazard_cfg: dict) -> dict:
                 nb_synth_tracks=proc_hazard_cfg["pert_tracks"])
 
             hazards[proc_hazard_name] = ibtracks_na
+
+        elif proc_hazard_name == "landslide":
+
+            hazards[proc_hazard_name] = get_landslide()
 
         else:
             raise Exception("fHazard type {proc_hazard_name} is not supported yet")
@@ -89,5 +96,31 @@ def get_tc(
     tc = TropCyclone.from_tracks(ibtracks_na, centroids=exp_centroids)
 
     return tc
+
+
+def get_landslide(
+    tmp_file: str = "/tmp/ls.shp", 
+    domain: tuple = (160.0, -50.0, 180.0, -30.0), 
+    res: float = 0.01) -> Landslide:
+    """Get landslide
+
+    Args:
+        tmp_file (str, optional): tmp file to be written. Defaults to "/tmp/ls.shp".
+        domain (tuple, optional): domain to be used. Defaults to (160.0, -50.0, 180.0, -30.0).
+
+    Raises:
+        Exception: _description_
+    """
+
+    landslide_gdf_all = read_file(LANDSLIDE_DATA)
+
+    landslide_gdf_all.to_file(tmp_file)
+
+    landslide = Landslide.from_hist(bbox=domain, input_gdf=tmp_file, res=res)
+
+    remove(tmp_file)
+
+    return landslide
+    
 
     
