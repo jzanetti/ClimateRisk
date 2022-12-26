@@ -1,7 +1,7 @@
 from matplotlib.pyplot import savefig, close
 from climada.entity.exposures.base import Exposures
 from os.path import join
-# from process import DOMAIN
+from cartopy.crs import PlateCarree
 from climada.hazard.tc_tracks import TCTracks as TCTracks_type
 from climada.engine.impact import Impact as Impact_type
 import climada.util.lines_polys_handler as u_lp
@@ -162,16 +162,18 @@ def plot_impact(workdir: str, hazard_name: str, basemap, baseexp, impact_obj: Im
         workdir (str): Working directory
         impact_obj (Impact_type): impact object
     """
-    
-    basemap.plot(color='white', edgecolor='black')
-    baseexp.plot(color="k")
 
-    impact_obj.plot_scatter_eai_exposure(
+    ax = plt.subplot(projection=PlateCarree())
+    baseexp.to_crs(4326).plot(
+        ax=ax, color="k", edgecolor='black')
+
+    ax = impact_obj.plot_scatter_eai_exposure(
+        axis=ax,
+        cmap="jet",
         figsize=(16, 12), 
-        adapt_fontsize=False, 
+        adapt_fontsize=True, 
         buffer=buffer, 
-        ignore_zero=True, 
-        edgecolors="k")
+        ignore_zero=True)
 
     savefig(
         join(workdir, f"impact_{hazard_name}.png"),

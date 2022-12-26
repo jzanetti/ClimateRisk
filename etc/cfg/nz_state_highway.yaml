@@ -10,7 +10,7 @@ hazard:
   landslide:
     enable: True
   TC:
-    enable: False
+    enable: True
     year_range: null # 2010-2012 or null
     pert_tracks: 1
 
