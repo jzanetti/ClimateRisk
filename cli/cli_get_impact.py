@@ -25,6 +25,7 @@ def get_example_usage():
     example_text = """example:
         * get_impact
             --workdir /tmp/climaterisk_data
+            --cfg nz_state_highway.yaml
         """
     return example_text
 
@@ -81,6 +82,7 @@ def get_data():
 
     print("Visualization ...")
     plot_wrapper(cfg, workdir, exp_objs)
+
 
 if __name__ == "__main__":
     get_data()

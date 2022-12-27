@@ -45,11 +45,10 @@ In the above file, there are mainly **5** sections:
 - ``input``: This section controls the infrastructure to be assessed:
     - ``file``: this must be a file in the format of _shapefile_.
     - ``value_adjustment_option``: The default value for an infrastructure is _1.0_, but we can overwrite it with either the values from the nearest grid point in the ``Litpop`` dataset, or a customized fixed value. ``litpop`` and ``fix`` cannot be both set to True.
-
+- ``hazard``: This defines the types of hazards to be used for the climate risk assessment. Currently ``landslide``, ``Tropical Cyclone (TC)`` and ``flood`` are supported.
 
 
 .. note::
 
    Note that for the New Zealand state highway, the total length is 11,000 kilometres (`ref <https://www.nzta.govt.nz/roads-and-rail/research-and-data/state-highway-frequently-asked-questions/>`_.), and
    the total estimated asset value is NZD$52 billion (`ref <https://www.nzta.govt.nz/planning-and-investment/national-land-transport-programme/2021-24-nltp/activity-classes/state-highway-maintenance/>`_).
-   Therefore the value for **infrastructure: state highway** is around **NZD$4,500,000 / km**

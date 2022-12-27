@@ -7,7 +7,7 @@ from climada.entity.impact_funcs import impact_func_set
 from yaml import safe_load
 from geopandas import read_file as geopandas_read_file
 from geopandas.geodataframe import GeoDataFrame
-
+from numpy import NaN, nanmin, nanmax
 
 def str2list_for_year(str_input: str or None) -> list:
     """Convert str (e.g., 2011-2012) to a list (e.g., [2011, 2012])
@@ -100,4 +100,20 @@ def check_exposure_value(value_adjustment_option: dict) -> bool:
     return True
 
 
+def get_exposure_range(exp_obj_gdf: GeoDataFrame, min_ratio: float = 0.75, max_ratio: float = 1.2) -> dict:
+    """Get range to be plotted
 
+    Args:
+        exp_obj_gdf (GeoDataFrame): _description_
+        min_ratio (float, optional): _description_. Defaults to 0.75.
+        max_ratio (float, optional): _description_. Defaults to 1.0.
+
+    Returns:
+        dict: _description_
+    """
+
+    all_values = exp_obj_gdf.value.values
+    return {
+        "min": min_ratio * nanmin(all_values),
+        "max": max_ratio * nanmax(all_values)
+    }

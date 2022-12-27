@@ -4,7 +4,7 @@ input:
   file: etc/data/nz-state-highway-centrelines-2012-SHP/nz-state-highway-centrelines-2012.shp
   value_adjustment_option: 
     litpop: false
-    fix: 4500000
+    fix: 52000000000
 
 hazard:
   landslide:

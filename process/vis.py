@@ -2,18 +2,27 @@ from matplotlib.pyplot import savefig, close
 from climada.entity.exposures.base import Exposures
 from os.path import join
 from cartopy.crs import PlateCarree
-from climada.hazard.tc_tracks import TCTracks as TCTracks_type
 from climada.engine.impact import Impact as Impact_type
-import climada.util.lines_polys_handler as u_lp
 from geopandas import GeoDataFrame
 import matplotlib.pyplot as plt
-from process.utils import read_basemap
+from process.utils import read_basemap, get_exposure_range
+from process.climada.plot import plot_tc, plot_scattered_data
 
-def plot_wrapper(cfg: dict, workdir: str, exp_objs: dict):
 
+def plot_wrapper(cfg: dict, workdir: str, exp_objs: dict, add_basemap: bool = False):
+    """Plot wrapper
+
+    Args:
+        cfg (dict): _description_
+        workdir (str): _description_
+        exp_objs (dict): _description_
+    """
     print("Read basemap for visualization ...")
 
-    basemap = read_basemap(cfg["vis"]["basemap"])
+    basemap = None
+    if add_basemap:
+        basemap = read_basemap(cfg["vis"]["basemap"])
+
     baseexp = read_basemap(cfg["input"]["file"])
 
     for proc_vis_name in cfg["vis"]:
@@ -67,95 +76,13 @@ def plot_exposure(workdir: str, exposure_obj: Exposures, basemap: GeoDataFrame o
     close()
 
 
-def plot_tc(workdir: str, tc_obj: TCTracks_type) -> Impact_type:
-    """Plot LitPop
-
-    Args:
-        workdir (str): Working directory
-        tc_obj (TCTracks_type): TC object
-    """
-    # tc_obj.plot(figsize=(16, 12), adapt_fontsize=False)
-    #savefig(
-    #    join(workdir, "tc.png"),
-    #    bbox_inches='tight',
-    #    dpi=200)
-    #close()
-
-    import cartopy.crs as ccrs
-    import climada.util.plot as u_plot
-    import matplotlib.cm as cm_mp
-    import numpy as np
-    from matplotlib.colors import BoundaryNorm, ListedColormap
-    import climada.util.coordinates as u_coord
-    from matplotlib.collections import LineCollection
-    from matplotlib.lines import Line2D
-    CAT_NAMES = {
-        -1: 'Tropical Depression',
-        0: 'Tropical Storm',
-        1: 'Hurricane Cat. 1',
-        2: 'Hurricane Cat. 2',
-        3: 'Hurricane Cat. 3',
-        4: 'Hurricane Cat. 4',
-        5: 'Hurricane Cat. 5',
-    }
-
-    legend = True
-    SAFFIR_SIM_CAT = [34, 64, 83, 96, 113, 137, 1000]
-
-    CAT_COLORS = cm_mp.rainbow(np.linspace(0, 1, len(SAFFIR_SIM_CAT)))
-    extent = (160.0, 180.0, -50.0, -30.0)
-    mid_lon = 0.5 * (extent[1] + extent[0])
-
-    kwargs = {}
-    kwargs['transform'] = ccrs.PlateCarree()
-    figsize = figsize=(16, 12)
-    adapt_fontsize = True
-    axis = None
-
-    if not axis:
-        proj = ccrs.PlateCarree(central_longitude=mid_lon)
-        _, axis, _ = u_plot.make_map(proj=proj, figsize=figsize, adapt_fontsize=adapt_fontsize)
-    axis.set_extent(extent, crs=kwargs['transform'])
-    u_plot.add_shapes(axis)
-
-    synth_flag = False
-    cmap = ListedColormap(colors=CAT_COLORS)
-    norm = BoundaryNorm([0] + SAFFIR_SIM_CAT, len(SAFFIR_SIM_CAT))
-    for track in tc_obj.data:
-        lonlat = np.stack([track.lon.values, track.lat.values], axis=-1)
-        lonlat[:, 0] = u_coord.lon_normalize(lonlat[:, 0], center=mid_lon)
-        segments = np.stack([lonlat[:-1], lonlat[1:]], axis=1)
-        # remove segments which cross 180 degree longitude boundary
-        segments = segments[segments[:, 0, 0] * segments[:, 1, 0] >= 0, :, :]
-        if track.orig_event_flag:
-            track_lc = LineCollection(segments, cmap=cmap, norm=norm,
-                                        linestyle='solid', **kwargs)
-        else:
-            synth_flag = True
-            track_lc = LineCollection(segments, cmap=cmap, norm=norm,
-                                        linestyle=':', **kwargs)
-        track_lc.set_array(track.max_sustained_wind.values)
-        axis.add_collection(track_lc)
-
-    if legend:
-        leg_lines = [Line2D([0], [0], color=CAT_COLORS[i_col], lw=2)
-                        for i_col in range(len(SAFFIR_SIM_CAT))]
-        leg_names = [CAT_NAMES[i_col] for i_col in sorted(CAT_NAMES.keys())]
-        if synth_flag:
-            leg_lines.append(Line2D([0], [0], color='grey', lw=2, ls='solid'))
-            leg_lines.append(Line2D([0], [0], color='grey', lw=2, ls=':'))
-            leg_names.append('Historical')
-            leg_names.append('Synthetic')
-        axis.legend(leg_lines, leg_names, loc=0)
-    plt.tight_layout()
-    savefig(
-        join(workdir, "tc.png"),
-        bbox_inches='tight',
-        dpi=200)
-    close()
-
-
-def plot_impact(workdir: str, hazard_name: str, basemap, baseexp, impact_obj: Impact_type, freq_curve_obj, buffer: float = 0.1):
+def plot_impact(
+    workdir: str, 
+    hazard_name: str, 
+    basemap, 
+    baseexp, 
+    impact_obj: Impact_type, 
+    freq_curve_obj):
     """Plot LitPop
 
     Args:
@@ -163,16 +90,22 @@ def plot_impact(workdir: str, hazard_name: str, basemap, baseexp, impact_obj: Im
         impact_obj (Impact_type): impact object
     """
 
-    ax = plt.subplot(projection=PlateCarree())
+    f = plt.figure(figsize=(8, 15))
+    ax = f.add_subplot(projection=PlateCarree())
     baseexp.to_crs(4326).plot(
         ax=ax, color="k", edgecolor='black')
+    
+    if basemap is not None:
+        basemap.plot(ax=ax, color='white', edgecolor='black')
 
-    ax = impact_obj.plot_scatter_eai_exposure(
-        axis=ax,
-        cmap="jet",
-        figsize=(16, 12), 
-        adapt_fontsize=True, 
-        buffer=buffer, 
+    vrange = get_exposure_range(impact_obj._build_exp().gdf)
+
+    plot_scattered_data(
+        impact_obj, 
+        f"Expected annual impact from {hazard_name}", 
+        axes=ax,
+        vmin=vrange["min"],
+        vmax=vrange["max"],
         ignore_zero=True)
 
     savefig(
