@@ -1,64 +1,16 @@
-"""
-Usage: get_data
-            --workdir /tmp/climaterisk_data
-            --job show
+import numpy as np
+import matplotlib.pyplot as plt
+from climada_petals.hazard.river_flood import RiverFlood
+from climada.hazard.centroids import Centroids
+from climada_petals.util.constants import HAZ_DEMO_FLDDPH, HAZ_DEMO_FLDFRC
+import matplotlib.pyplot as plt
+years = [2000]
+# generating RiverFlood hazard from netCDF file
+# uses centroids from Natural Earth Multipolygon for Germany and Switzerland
+rf = RiverFlood.from_nc(countries = ["NZL"], years=years, dph_path=HAZ_DEMO_FLDDPH, frc_path=HAZ_DEMO_FLDFRC)
+rf.event_name
+rf.plot_intensity(event=0, smooth = False)
 
-Author: Sijin Zhang
+plt.savefig("/tmp/test.png")
+plt.close()
 
-Description: 
-    This is a wrapper to get build-in dataset from climadarisk
-
-Debug:
-    export PYTHONPATH=/Users/zhans/Github/ClimateRisk:$PYTHONPATH
-"""
-
-import argparse
-from process import GET_DATA_JOBS
-from process.get_data import show_data, download_data
-
-def get_example_usage():
-    example_text = """example:
-        * get_data
-            --workdir /tmp/climaterisk_data
-            --job show
-        """
-    return example_text
-
-
-def setup_parser():
-    parser = argparse.ArgumentParser(
-        description="Get build-in dataset from ClimadaRisk",
-        epilog=get_example_usage(),
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-    )
-
-    parser.add_argument(
-        "--workdir",
-        required=True,
-        help="working directory")
-
-    parser.add_argument(
-        "--job",
-        required=True,
-        choices=GET_DATA_JOBS,
-        help=f"Climada get_data job name, choices {GET_DATA_JOBS}")
-
-    return parser.parse_args(
-        [
-               "--workdir", "/tmp/climaterisk",
-              "--job", "download_litpop",
-        ]
-    )
-
-
-def get_data():
-    args = setup_parser()
-
-    if args.job in ["show_all_jobs"]:
-        show_data()
-
-    elif args.job in ["download_litpop"]:
-        download_data(args.job)
-
-if __name__ == "__main__":
-    get_data()
