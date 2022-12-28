@@ -97,8 +97,11 @@ def update_exposure(cfg: dict, exp_obj: Exposures, impacts: dict, hazards: dict)
             exp_obj.gdf = apply_litpop_to_exposure(exp_obj.gdf, litpop_obj.gdf)
 
         if cfg["input"]["value_adjustment_option"]["fix"]:
-            exp_obj.gdf.value  = exp_obj.gdf.geometry_orig.length * (
-                cfg["input"]["value_adjustment_option"]["fix"] / exp_obj.gdf.geometry_orig.length.sum())
+            if cfg["input"]["value_adjustment_option"]["fix"]["method"] == "total":
+                exp_obj.gdf.value  = exp_obj.gdf.geometry_orig.length * (
+                    cfg["input"]["value_adjustment_option"]["fix"]["value"] / exp_obj.gdf.geometry_orig.length.sum())
+            elif cfg["input"]["value_adjustment_option"]["fix"]["method"] == "individual":
+                exp_obj.gdf.value  = cfg["input"]["value_adjustment_option"]["fix"]["value"]
 
         exposure_obj = assign_impact(exp_obj, impacts[hazard_name])
         

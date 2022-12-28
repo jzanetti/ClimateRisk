@@ -1,12 +1,14 @@
-from climada.hazard import TCTracks, TropCyclone, Centroids
+from climada.hazard import TCTracks, TropCyclone
 from process.vis import plot_tc
 from climada.hazard.tc_tracks import TCTracks as TCTracks_type
 from process.utils import gdf2centroids, str2list_for_year
 from climada.entity.exposures.base import Exposures
 from os import remove
-from process import LANDSLIDE_DATA, TC_PROVIDOR
+from process import LANDSLIDE_DATA, TC_PROVIDOR, FLOOD_DATA
 from geopandas import read_file
 from process.climada_petals.landslide import Landslide
+from pickle import load as pickle_load
+
 
 def get_hazard(hazard_cfg: dict) -> dict:
     """Get hazard
@@ -121,6 +123,18 @@ def get_landslide(
     remove(tmp_file)
 
     return landslide
+
+
+def get_riverflood():
+    """Get river flood
+
+    Returns:
+        _type_: _description_
+    """
+    return pickle_load(open(FLOOD_DATA, "rb"))
+
+
+
     
 
     

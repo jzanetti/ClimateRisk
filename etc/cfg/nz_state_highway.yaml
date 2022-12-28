@@ -3,12 +3,14 @@ name: nz_state_highway
 input:
   file: etc/data/nz-state-highway-centrelines-2012-SHP/nz-state-highway-centrelines-2012.shp
   value_adjustment_option: 
-    litpop: false
+    litpop: null
     fix: 
       method: individual # individual or total
-      value: 52000000000
+      value: 1
 
 hazard:
+  flood:
+    enable: True
   landslide:
     enable: True
   TC:
