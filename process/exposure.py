@@ -109,7 +109,7 @@ def update_exposure(cfg: dict, exp_obj: Exposures, impacts: dict, hazards: dict)
         
         if hazard_name == "TC":
             update_hazard = TropCyclone.from_tracks(hazards[hazard_name], centroids=exp_centroids)
-        elif hazard_name == "landslide":
+        elif hazard_name in ["landslide", "flood"]:
             update_hazard = hazards[hazard_name]
         else:
             raise Exception(f"Hazard {hazard_name} is not supported yet ...")

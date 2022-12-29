@@ -7,6 +7,7 @@ from climada.util.lines_polys_handler import impact_pnt_agg, AggMethod
 from geopandas import GeoDataFrame
 from climada.entity import ImpactFunc
 from numpy import linspace, sort, array
+from climada_petals.entity.impact_funcs.river_flood import flood_imp_func_set
 
 def get_impact(hazard_cfg: dict) -> dict:
     """Return an impact function
@@ -30,6 +31,8 @@ def get_impact(hazard_cfg: dict) -> dict:
             proc_func = ImpfTropCyclone.from_emanuel_usa()
         elif proc_hazard_name == "landslide":
             proc_func = landslide_impact_func()
+        elif proc_hazard_name == "flood":
+            proc_func = flood_impact_func()
         else:
             raise Exception(f"Hazard type {proc_hazard_name} is not supported yet ...")
 
@@ -37,6 +40,19 @@ def get_impact(hazard_cfg: dict) -> dict:
 
 
     return impf_set
+
+
+def flood_impact_func() -> ImpactFunc:
+    """Flood impact function
+
+    Args:
+        num (int, optional): _description_. Defaults to 15.
+
+    Returns:
+        _type_: _description_
+    """
+    impf_set = flood_imp_func_set()
+    return impf_set.get_func(fun_id=6)[0]
 
 
 def calculate_impact_func(exposure_objs: dict) -> Impact_type:

@@ -2,10 +2,10 @@ Impact
 ===================================
 
 We are able to produce impact assessments for infrastructures given different types of hazards.
-All **infrastructures** must be provided in the _shapefile_ format, which contains objects such as _LineString_ or _Point_. 
-In contrast, the **hazard** can come from a file in the _shapefile_ format, or be obtained from the _Climada_ API.
+All **infrastructures** must be provided in the `shapefile` format, which contains objects such as `LineString` or `Point`. 
+In contrast, the **hazard** can come from a file in the `shapefile` format, or be obtained from the `Climada` API.
 
-The production of an impact assessment task is controlled by a configuration file in the format of _YAML_.
+The production of an impact assessment task is controlled by a configuration file in the format of `YAML`.
 
 Configuration
 ^^^^^^^^^
@@ -18,7 +18,8 @@ The configuration file must be defined before any impact assessment tasks. A bas
     input:
         file: etc/data/nz-state-highway-centrelines-2012-SHP/nz-state-highway-centrelines-2012.shp
         value_adjustment_option: 
-            litpop: false
+            litpop: null
+            gdp2asset: null
             fix: 
                 method: individual
                 value: 52000000000
@@ -28,8 +29,8 @@ The configuration file must be defined before any impact assessment tasks. A bas
             enable: True
         TC:
             enable: True
-            year_range: null # 2010-2012 or null
-            pert_tracks: 1
+        flood:
+            enable: True
 
     vis:
         basemap: etc/data/nz_coastlines/nz-coastlines-and-islands-polygons-topo-150k.shp
@@ -44,13 +45,13 @@ The configuration file must be defined before any impact assessment tasks. A bas
 In the above file, there are mainly **5** sections:
 
 - ``name``: The experiment name will be included in the filename of any outputs.
-- ``input``: This section controls the infrastructure to be assessed:
-    - ``file``: this must be a file in the format of _shapefile_.
-    - ``value_adjustment_option``: The default value for an infrastructure is _1.0_, but we can overwrite it with either the values from the nearest grid point in the ``Litpop`` dataset, or a customized fixed value. 
+- ``input``: This section controls the infrastructure to be assessed.
+    - ``file``: this must be a file in the format of `shapefile`.
+    - ``value_adjustment_option``: The default value for an infrastructure is `1.0`, but we can overwrite it with either the values from the nearest grid point in the ``Litpop``/``gdp2asset`` dataset, or a customized fixed value. 
     ``litpop`` and ``fix`` cannot be both set to True. 
     Note that for ``fix``, when the method is ``total``, the defined value is the total value for all the infrastructure. 
     If the method is ``individual``, the value is used for each segment for the infrastructure 
-- ``hazard``: This defines the types of hazards to be used for the climate risk assessment. Currently ``landslide``, ``Tropical Cyclone (TC)`` and ``flood`` are supported.
+- ``hazard``: This defines the types of hazards to be used for the climate risk assessment. Currently ``landslide``, ``TC (Tropical Cyclone)`` and ``flood`` are supported.
 
 
 .. note::

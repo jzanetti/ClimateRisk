@@ -29,11 +29,18 @@ clear_all:
 	rm -rf $(CONDA_BASE)/conda-bld/osx-arm64/.cache/recipe/$(PKG)*
 	$(CONDA) index $(CONDA_BASE)/conda-bld
 
-env: clear_env
+climada_core:
 	rm -rf /tmp/$(PKG)
 	mkdir -p /tmp/$(PKG)
 	curl -o /tmp/$(PKG)/env_climada.yml https://raw.githubusercontent.com/CLIMADA-project/climada_python/main/requirements/env_climada.yml
 	conda env create -n $(PKG) -f /tmp/$(PKG)/env_climada.yml
 	conda activate $(PKG); $(CONDA_BASE)/envs/$(PKG)/bin/pip install climada
+
+climada_petals:
+	rm -rf /tmp/$(PKG)
+	mkdir -p /tmp/$(PKG)
+	git clone https://github.com/CLIMADA-project/climada_petals.git; cd climada_petals; git checkout develop; cd ..; conda env update -n $(PKG) -f climada_petals/requirements/env_climada.yml; $(CONDA_BASE)/envs/$(PKG)/bin/pip install -e climada_petals
+
+env: clear_env climada_core climada_petals
 
 all: env

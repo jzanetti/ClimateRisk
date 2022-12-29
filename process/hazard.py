@@ -4,7 +4,7 @@ from climada.hazard.tc_tracks import TCTracks as TCTracks_type
 from process.utils import gdf2centroids, str2list_for_year
 from climada.entity.exposures.base import Exposures
 from os import remove
-from process import LANDSLIDE_DATA, TC_PROVIDOR, FLOOD_DATA
+from process import LANDSLIDE_DATA, TC_DATA, FLOOD_DATA
 from geopandas import read_file
 from process.climada_petals.landslide import Landslide
 from pickle import load as pickle_load
@@ -36,8 +36,8 @@ def get_hazard(hazard_cfg: dict) -> dict:
 
             # Load histrocial tropical cyclone tracks from ibtracs over the North Atlantic basin between 2010-2012
             ibtracks_na = TCTracks.from_ibtracs_netcdf(
-                provider=TC_PROVIDOR, 
-                year_range=str2list_for_year(proc_hazard_cfg["year_range"]), 
+                provider=TC_DATA["provider"], 
+                year_range=str2list_for_year(TC_DATA["year_range"]), 
                 estimate_missing=True)
 
             # Interpolation to make the track smooth and to allow applying calc_perturbed_trajectories
@@ -45,13 +45,17 @@ def get_hazard(hazard_cfg: dict) -> dict:
 
             # Add randomly generated tracks using the calc_perturbed_trajectories method (1 per historical track)
             ibtracks_na.calc_perturbed_trajectories(
-                nb_synth_tracks=proc_hazard_cfg["pert_tracks"])
+                nb_synth_tracks=TC_DATA["pert_tracks"])
 
             hazards[proc_hazard_name] = ibtracks_na
 
         elif proc_hazard_name == "landslide":
 
             hazards[proc_hazard_name] = get_landslide()
+
+        elif proc_hazard_name == "flood":
+
+            hazards[proc_hazard_name] = get_riverflood()
 
         else:
             raise Exception("fHazard type {proc_hazard_name} is not supported yet")
