@@ -17,8 +17,18 @@ from geopandas import GeoDataFrame
 from climada.hazard import TropCyclone
 from process.utils import gdf2centroids
 
-def apply_litpop_to_exposure(exp_obj: GeoDataFrame, litpop_obj: GeoDataFrame) -> GeoDataFrame:
-    """Apply Litpop value to an exposure
+from pickle import load as pickle_load
+from process import GDP2ASSET_DATA
+
+#def apply_gdp2asset_to_exposure(exp_obj: GeoDataFrame):
+
+#    gdp2asset = pickle_load(open(GDP2ASSET_DATA, "rb"))
+
+
+
+
+def apply_asset_to_exposure(exp_obj: GeoDataFrame, litpop_obj: GeoDataFrame) -> GeoDataFrame:
+    """Apply Litpop/gdp2asset value to an exposure
 
     Args:
         exp_obj (GeoDataFrame): _description_
@@ -94,7 +104,11 @@ def update_exposure(cfg: dict, exp_obj: Exposures, impacts: dict, hazards: dict)
                     "lons": [min(exp_obj.gdf["longitude"]), max(exp_obj.gdf["longitude"])]
                 }
             )
-            exp_obj.gdf = apply_litpop_to_exposure(exp_obj.gdf, litpop_obj.gdf)
+            exp_obj.gdf = apply_asset_to_exposure(exp_obj.gdf, litpop_obj.gdf)
+
+        if cfg["input"]["value_adjustment_option"]["gdp2asset"]:
+            gdp2asset_obj = pickle_load(open(GDP2ASSET_DATA, "rb"))
+            exp_obj.gdf = apply_asset_to_exposure(exp_obj.gdf, gdp2asset_obj.gdf)
 
         if cfg["input"]["value_adjustment_option"]["fix"]:
             if cfg["input"]["value_adjustment_option"]["fix"]["method"] == "total":
@@ -169,6 +183,21 @@ def get_from_litpop(latlon: dict or None = None) -> Exposures:
         litpop_obj.gdf = filtered_gdf
 
     return litpop_obj
+
+
+def get_from_gdp(latlon: dict or None = None) -> Exposures:
+    """_summary_
+
+    Args:
+        latlon (dictorNone, optional): _description_. Defaults to None.
+
+    Returns:
+        Exposures: _description_
+    """
+    from climada_petals.entity.exposures.gdp_asset import GDP2Asset
+    from climada_petals.util.constants import DEMO_GDP2ASSET
+    gdpa = GDP2Asset()
+    gdpa.set_countries(countries = ['NZL'], ref_year = 2000, path=DEMO_GDP2ASSET)
 
 
 def assign_impact(exp_obj, impact_func: impact_func_set):

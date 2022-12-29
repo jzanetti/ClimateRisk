@@ -94,8 +94,15 @@ def check_exposure_value(value_adjustment_option: dict) -> bool:
     Returns:
         bool: _description_
     """
-    if value_adjustment_option["fix"] and value_adjustment_option["litpop"]:
-        raise Exception("value adjustments (fix, litpop) are both set to True")
+
+    total_true = 0
+
+    for datatype2check in value_adjustment_option:
+        if value_adjustment_option[datatype2check]:
+            total_true += 1
+
+    if total_true > 1:
+        raise Exception("More than 1 value adjustments (fix, litpop, gdp2asset) is set to True")
 
     return True
 

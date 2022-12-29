@@ -8,3 +8,4 @@ TC_DATA = {
 
 LANDSLIDE_DATA = "etc/data/nasa_global_landslide_catalog_point/nasa_global_landslide_catalog_point.shp"
 FLOOD_DATA = "etc/data/riverflood/riverflood_data.pickle"
+GDP2ASSET_DATA = "etc/data/get_gdp/gdp2asset_nz.pickle"
