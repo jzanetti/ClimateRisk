@@ -22,6 +22,6 @@ Contents
 .. toctree::
 
    Installation
-   Impact
+   Concepts
+   Cfg
    Reference
-   CLIMADA
