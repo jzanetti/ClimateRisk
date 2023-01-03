@@ -11,9 +11,9 @@ input:
 
 hazard:
   flood:
-    enable: False
-  landslide:
     enable: True
+  landslide:
+    enable: False
   TC:
     enable: False
 
