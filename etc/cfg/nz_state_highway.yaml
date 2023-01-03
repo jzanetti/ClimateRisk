@@ -4,27 +4,27 @@ input:
   file: etc/data/nz-state-highway-centrelines-2012-SHP/nz-state-highway-centrelines-2012.shp
   value_adjustment_option: 
     litpop: null
-    gdp2asset: true
+    gdp2asset: null
     fix:
-      method: total # individual or total
+      method: individual # individual or total
       value: 1
 
 hazard:
   flood:
-    enable: True
+    enable: False
   landslide:
     enable: False
   TC:
-    enable: False
+    enable: True
 
 vis:
   basemap: etc/data/nz_coastlines/nz-coastlines-and-islands-polygons-topo-150k.shp
   exposure:
     enable: False
   hazard:
-    enable: False
-  impact:
     enable: True
+  impact:
+    enable: False
 
 
 

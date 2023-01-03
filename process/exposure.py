@@ -125,31 +125,8 @@ def update_exposure(cfg: dict, exp_obj: Exposures, impacts: dict, hazards: dict)
 
     outputs = {}
 
-    # check_exposure_value(cfg["input"]["value_adjustment_option"])
-
     for hazard_name in impacts:
         
-        """
-        if cfg["input"]["value_adjustment_option"]["litpop"]:
-            litpop_obj = get_from_litpop(
-                latlon = {
-                    "lats": [min(exp_obj.gdf["latitude"]), max(exp_obj.gdf["latitude"])],
-                    "lons": [min(exp_obj.gdf["longitude"]), max(exp_obj.gdf["longitude"])]
-                }
-            )
-            exp_obj.gdf = apply_asset_to_exposure(exp_obj.gdf, litpop_obj.gdf)
-
-        if cfg["input"]["value_adjustment_option"]["gdp2asset"]:
-            gdp2asset_obj = pickle_load(open(GDP2ASSET_DATA, "rb"))
-            exp_obj.gdf = apply_asset_to_exposure(exp_obj.gdf, gdp2asset_obj.gdf)
-
-        if cfg["input"]["value_adjustment_option"]["fix"]:
-            if cfg["input"]["value_adjustment_option"]["fix"]["method"] == "total":
-                exp_obj.gdf.value  = exp_obj.gdf.geometry_orig.length * (
-                    cfg["input"]["value_adjustment_option"]["fix"]["value"] / exp_obj.gdf.geometry_orig.length.sum())
-            elif cfg["input"]["value_adjustment_option"]["fix"]["method"] == "individual":
-                exp_obj.gdf.value  = cfg["input"]["value_adjustment_option"]["fix"]["value"]
-        """
         exposure_obj = assign_impact(exp_obj, impacts[hazard_name])
         
         exp_centroids = gdf2centroids(exposure_obj.gdf)
