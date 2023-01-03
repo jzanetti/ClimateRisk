@@ -1,7 +1,6 @@
 from climada.util.api_client import Client
 from process import LITPOP_DOMAIN
 from climada.entity.exposures.base import Exposures
-from process.vis import plot_exposure
 from process.utils import get_hazard_info, check_exposure_value
 from climada.entity.impact_funcs import impact_func_set
 from geopandas import read_file
@@ -19,11 +18,6 @@ from process.utils import gdf2centroids
 
 from pickle import load as pickle_load
 from process import GDP2ASSET_DATA
-
-#def apply_gdp2asset_to_exposure(exp_obj: GeoDataFrame):
-
-#    gdp2asset = pickle_load(open(GDP2ASSET_DATA, "rb"))
-
 
 
 
@@ -74,9 +68,47 @@ def get_exposure(input_cfg: dict) -> Exposures:
     else:
         raise Exception("input file type is not supported yet")
 
+
+    print("Updating exposure object value ...")
+
+    check_exposure_value(input_cfg["value_adjustment_option"])
+
+    if input_cfg["value_adjustment_option"]["fix"]:
+
+        print("Applying fixed value ...")
+
+        if input_cfg["value_adjustment_option"]["fix"]["method"] == "total":
+            exp_obj.gdf.value  = exp_obj.gdf.geometry_orig.length * (
+                input_cfg["value_adjustment_option"]["fix"]["value"] / 
+                exp_obj.gdf.geometry_orig.length.sum())
+
+        elif input_cfg["value_adjustment_option"]["fix"]["method"] == "individual":
+            exp_obj.gdf.value  = input_cfg["value_adjustment_option"]["fix"]["value"]
+
+    else:
+
+        print("Applying litpop/gdp values ...")
+
+        exp_obj_latlon = get_exp_obj_latlon(exp_obj)
+
+        if input_cfg["value_adjustment_option"]["litpop"]:
+            ref_obj = get_from_litpop(exp_obj_latlon)
+
+        elif input_cfg["value_adjustment_option"]["gdp2asset"]:
+            ref_obj = get_from_gdp(exp_obj_latlon)
+
+        exp_obj.gdf = apply_asset_to_exposure(exp_obj.gdf, ref_obj.gdf)
+
     return exp_obj
 
 
+def get_exp_obj_latlon(exp_obj: Exposures) -> dict:
+    """_summary_
+    """
+    return {
+            "lats": [min(exp_obj.gdf["latitude"]), max(exp_obj.gdf["latitude"])],
+            "lons": [min(exp_obj.gdf["longitude"]), max(exp_obj.gdf["longitude"])]
+        }
 
 
 def update_exposure(cfg: dict, exp_obj: Exposures, impacts: dict, hazards: dict) -> dict:
@@ -93,10 +125,11 @@ def update_exposure(cfg: dict, exp_obj: Exposures, impacts: dict, hazards: dict)
 
     outputs = {}
 
-    check_exposure_value(cfg["input"]["value_adjustment_option"])
+    # check_exposure_value(cfg["input"]["value_adjustment_option"])
 
     for hazard_name in impacts:
-
+        
+        """
         if cfg["input"]["value_adjustment_option"]["litpop"]:
             litpop_obj = get_from_litpop(
                 latlon = {
@@ -116,7 +149,7 @@ def update_exposure(cfg: dict, exp_obj: Exposures, impacts: dict, hazards: dict)
                     cfg["input"]["value_adjustment_option"]["fix"]["value"] / exp_obj.gdf.geometry_orig.length.sum())
             elif cfg["input"]["value_adjustment_option"]["fix"]["method"] == "individual":
                 exp_obj.gdf.value  = cfg["input"]["value_adjustment_option"]["fix"]["value"]
-
+        """
         exposure_obj = assign_impact(exp_obj, impacts[hazard_name])
         
         exp_centroids = gdf2centroids(exposure_obj.gdf)
@@ -185,7 +218,7 @@ def get_from_litpop(latlon: dict or None = None) -> Exposures:
     return litpop_obj
 
 
-def get_from_gdp(latlon: dict or None = None) -> Exposures:
+def get_from_gdp(latlon: dict or None = None, gdp_year: int = 2000) -> Exposures:
     """_summary_
 
     Args:
@@ -194,10 +227,19 @@ def get_from_gdp(latlon: dict or None = None) -> Exposures:
     Returns:
         Exposures: _description_
     """
-    from climada_petals.entity.exposures.gdp_asset import GDP2Asset
-    from climada_petals.util.constants import DEMO_GDP2ASSET
-    gdpa = GDP2Asset()
-    gdpa.set_countries(countries = ['NZL'], ref_year = 2000, path=DEMO_GDP2ASSET)
+    gdp2asset_obj = pickle_load(open(GDP2ASSET_DATA, "rb"))
+
+    if latlon is not None:
+        gdf = gdp2asset_obj.gdf
+        filtered_gdf = gdf[
+            (gdf['latitude'] >= latlon["lats"][0]) & 
+            (gdf['latitude'] <= latlon["lats"][1]) &
+            (gdf['longitude'] >= latlon["lons"][0]) & 
+            (gdf['longitude'] <= latlon["lons"][1])]
+
+        gdp2asset_obj.gdf = filtered_gdf
+
+    return gdp2asset_obj
 
 
 def assign_impact(exp_obj, impact_func: impact_func_set):

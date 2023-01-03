@@ -33,6 +33,11 @@ def plot_wrapper(cfg: dict, workdir: str, exp_objs: dict, add_basemap: bool = Fa
         if not cfg["vis"][proc_vis_name]["enable"]:
             continue
 
+
+        if proc_vis_name == "exposure":
+            for proc_exp in exp_objs:
+                plot_exposure(workdir, proc_exp, basemap)
+
         if proc_vis_name == "impact":
             for hazard_name in exp_objs:
                 plot_impact(

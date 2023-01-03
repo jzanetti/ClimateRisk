@@ -4,9 +4,9 @@ input:
   file: etc/data/nz-state-highway-centrelines-2012-SHP/nz-state-highway-centrelines-2012.shp
   value_adjustment_option: 
     litpop: null
-    gdp2asset: null
+    gdp2asset: true
     fix:
-      method: individual # individual or total
+      method: total # individual or total
       value: 1
 
 hazard:
