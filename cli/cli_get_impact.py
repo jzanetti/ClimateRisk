@@ -81,7 +81,7 @@ def get_data():
     exp_objs = calculate_impact_func(exp_objs)
 
     print("Visualization ...")
-    plot_wrapper(cfg, workdir, exp_objs)
+    plot_wrapper(cfg, workdir, exp_objs, add_basemap=True)
 
 
 if __name__ == "__main__":

@@ -73,6 +73,13 @@ A total of 175 years (up to 2022) Tropical cyclone (TC) records are used. Additi
 .. image:: img/TC_tracks.png
    :width: 400
 
+2.2 Landslide
+--------
+Landslide is obtained from NASA Global Landslide Catalog (Points). It records most landslides globally (For New Zealand, the data for the last 30 years are included).
+
+.. image:: img/landslide.png
+   :width: 400
+
 
 
 

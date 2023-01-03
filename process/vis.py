@@ -6,7 +6,7 @@ from climada.engine.impact import Impact as Impact_type
 from geopandas import GeoDataFrame
 import matplotlib.pyplot as plt
 from process.utils import read_basemap, get_exposure_range
-from process.climada.plot import plot_tc, plot_scattered_data
+from process.climada.plot import plot_tc, plot_scattered_data, plot_landslide
 
 
 def plot_wrapper(cfg: dict, workdir: str, exp_objs: dict, add_basemap: bool = False):
@@ -53,7 +53,10 @@ def plot_wrapper(cfg: dict, workdir: str, exp_objs: dict, add_basemap: bool = Fa
                 if hazard_name == "TC":
                     print("plotting TC ...")
                     plot_tc(workdir, exp_objs[hazard_name]["hazard"])
-
+                if hazard_name == "landslide":
+                    print("plotting landslide ...")
+                    plot_landslide(workdir, exp_objs[hazard_name]["hazard"], basemap)
+    
 
 def plot_exposure(workdir: str, exposure_obj: Exposures, basemap: GeoDataFrame or None):
     """Plot exposure

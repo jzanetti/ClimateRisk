@@ -13,9 +13,9 @@ hazard:
   flood:
     enable: False
   landslide:
-    enable: False
-  TC:
     enable: True
+  TC:
+    enable: False
 
 vis:
   basemap: etc/data/nz_coastlines/nz-coastlines-and-islands-polygons-topo-150k.shp

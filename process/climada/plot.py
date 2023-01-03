@@ -10,7 +10,7 @@ import cartopy.crs as ccrs
 import climada.util.coordinates as u_coord
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from textwrap import wrap
-
+from numpy import max as numpy_max
 
 from matplotlib.pyplot import savefig, close
 from os.path import join
@@ -18,8 +18,17 @@ from climada.hazard.tc_tracks import TCTracks as TCTracks_type
 from climada.engine.impact import Impact as Impact_type
 import matplotlib.pyplot as plt
 from process.utils import read_basemap, get_exposure_range
-
-
+from climada.entity.exposures.base import Exposures
+from geopandas import GeoDataFrame
+import cartopy.crs as ccrs
+import climada.util.plot as u_plot
+import matplotlib.cm as cm_mp
+import numpy as np
+from matplotlib.colors import BoundaryNorm, ListedColormap
+import climada.util.coordinates as u_coord
+from matplotlib.collections import LineCollection
+from matplotlib.lines import Line2D
+from matplotlib.pyplot import title
 
 def plot_tc(workdir: str, tc_obj: TCTracks_type) -> Impact_type:
     """Plot LitPop
@@ -28,21 +37,6 @@ def plot_tc(workdir: str, tc_obj: TCTracks_type) -> Impact_type:
         workdir (str): Working directory
         tc_obj (TCTracks_type): TC object
     """
-    # tc_obj.plot(figsize=(16, 12), adapt_fontsize=False)
-    #savefig(
-    #    join(workdir, "tc.png"),
-    #    bbox_inches='tight',
-    #    dpi=200)
-    #close()
-
-    import cartopy.crs as ccrs
-    import climada.util.plot as u_plot
-    import matplotlib.cm as cm_mp
-    import numpy as np
-    from matplotlib.colors import BoundaryNorm, ListedColormap
-    import climada.util.coordinates as u_coord
-    from matplotlib.collections import LineCollection
-    from matplotlib.lines import Line2D
     CAT_NAMES = {
         -1: 'Tropical Depression',
         0: 'Tropical Storm',
@@ -214,3 +208,45 @@ def plot_scattered_data(impact_obj, title, cmap: str = "jet",
     plt.tight_layout()
 
     return axes
+
+
+
+def plot_landslide(workdir: str, landslide_obj: Exposures, basemap: GeoDataFrame or None):
+    """Plot landslide
+
+    Args:
+        workdir (str): _description_
+        landslide_obj (Exposures): _description_
+        basemap (GeoDataFrameorNone): _description_
+    """
+    base_ax = None
+    if basemap is not None:
+        base_ax = basemap.plot(color='white', edgecolor='black')
+
+    landslide_obj._set_coords_centroids()
+    landslide_coord = landslide_obj.centroids.coord
+    landslide_value = landslide_obj.intensity.toarray()
+    landslide_value = numpy_max(landslide_value, 0)
+
+
+    data_len = len(landslide_value)
+
+    lats = []
+    lons = []
+    values = []
+    for i in range(data_len):
+        proc_value = landslide_value[i]
+        if proc_value > 0.0:
+            lats.append(landslide_coord[i][0])
+            lons.append(landslide_coord[i][1])
+            values.append(proc_value)
+    
+    base_ax.scatter(lons, lats, c="r")
+
+    title("Landslide")
+
+    savefig(
+        join(workdir, "landslide.png"),
+        bbox_inches='tight',
+        dpi=200)
+    close()
