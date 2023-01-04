@@ -1,8 +1,7 @@
-from climada.hazard import TCTracks, TropCyclone
+from climada.hazard import TCTracks
 from process.vis import plot_tc
 from climada.hazard.tc_tracks import TCTracks as TCTracks_type
-from process.utils import gdf2centroids, str2list_for_year
-from climada.entity.exposures.base import Exposures
+from process.utils import str2list_for_year
 from os import remove
 from process import LANDSLIDE_DATA, TC_DATA, FLOOD_DATA
 from geopandas import read_file
@@ -34,20 +33,7 @@ def get_hazard(hazard_cfg: dict) -> dict:
 
         if proc_hazard_name == "TC":
 
-            # Load histrocial tropical cyclone tracks from ibtracs over the North Atlantic basin between 2010-2012
-            ibtracks_na = TCTracks.from_ibtracs_netcdf(
-                provider=TC_DATA["provider"], 
-                year_range=str2list_for_year(TC_DATA["year_range"]), 
-                estimate_missing=True)
-
-            # Interpolation to make the track smooth and to allow applying calc_perturbed_trajectories
-            ibtracks_na.equal_timestep(0.5)
-
-            # Add randomly generated tracks using the calc_perturbed_trajectories method (1 per historical track)
-            ibtracks_na.calc_perturbed_trajectories(
-                nb_synth_tracks=TC_DATA["pert_tracks"])
-
-            hazards[proc_hazard_name] = ibtracks_na
+            hazards[proc_hazard_name] = get_tc()
 
         elif proc_hazard_name == "landslide":
 
@@ -63,43 +49,25 @@ def get_hazard(hazard_cfg: dict) -> dict:
     return hazards
 
 
-def get_tc(
-    workdir: str, 
-    exposure_obj: Exposures, 
-    provider: str = "wellington", 
-    year_range: None or list = None,
-    vis_flag: bool = False) -> TCTracks_type:
+def get_tc(smooth_factor: float = 0.5) -> TCTracks_type:
     """Get TC from a certain provider
-
-    Args:
-        workdir (str): working directory
-        exposure_obj (Exposures): exposures object
-        year_range (None or list): e.g., [2000, 2001]
-        provider (str, optional): TC center. Defaults to "wellington".
-        vis_flag (bool, optional): if create visualization. Defaults to False
 
     Returns:
         _type_: _description_
     """
 
     # Load histrocial tropical cyclone tracks from ibtracs over the North Atlantic basin between 2010-2012
-    ibtracks_na = TCTracks.from_ibtracs_netcdf(provider=provider, year_range=year_range, estimate_missing=True)
+    tc = TCTracks.from_ibtracs_netcdf(
+        provider=TC_DATA["provider"], 
+        year_range=str2list_for_year(TC_DATA["year_range"]), 
+        estimate_missing=True)
 
     # Interpolation to make the track smooth and to allow applying calc_perturbed_trajectories
-    ibtracks_na.equal_timestep(0.5)
+    tc.equal_timestep(smooth_factor)
 
     # Add randomly generated tracks using the calc_perturbed_trajectories method (1 per historical track)
-    ibtracks_na.calc_perturbed_trajectories(nb_synth_tracks=1)
-
-    # plot TC
-    if vis_flag:
-        plot_tc(workdir, ibtracks_na)
-
-    # Define the centroids from the exposures position
-    exp_centroids = gdf2centroids(exposure_obj["exposure_obj"].gdf)
-
-    # Using the tracks, compute the windspeed at the location of the centroids
-    tc = TropCyclone.from_tracks(ibtracks_na, centroids=exp_centroids)
+    tc.calc_perturbed_trajectories(
+        nb_synth_tracks=TC_DATA["pert_tracks"])
 
     return tc
 

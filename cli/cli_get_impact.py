@@ -8,8 +8,6 @@ Author: Sijin Zhang
 Description: 
     This is a wrapper to get build-in dataset from climadarisk
 
-Debug:
-    export PYTHONPATH=/Users/zhans/Github/ClimateRisk:$PYTHONPATH
 """
 
 import argparse
@@ -50,7 +48,7 @@ def setup_parser():
     return parser.parse_args(
         [
             "--workdir", "/tmp/climaterisk",
-            "--cfg", "etc/cfg/nz_state_highway.yaml"
+            "--cfg", "etc/cfg/nz_state_highway_impact.yaml"
         ]
     )
 

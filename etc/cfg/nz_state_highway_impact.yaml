@@ -7,13 +7,13 @@ input:
     gdp2asset: null
     fix:
       method: individual # individual or total
-      value: 1
+      value: 1.0
 
 hazard:
   flood:
-    enable: False
+    enable: True
   landslide:
-    enable: False
+    enable: True
   TC:
     enable: True
 
@@ -24,7 +24,7 @@ vis:
   hazard:
     enable: False
   impact:
-    enable: False
+    enable: True
 
 
 
