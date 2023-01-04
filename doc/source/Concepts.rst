@@ -87,7 +87,20 @@ The runoff was used to derive spatially explicit flood depth (FLDDPH) and floode
 .. image:: img/flood.png
    :width: 350
 
+The type of **Hazard** can be defined in the configuration file. For example, in the following configuration file ``landslide`` is enabled in **ClimateRisk**:
 
+.. code-block:: yaml
+
+    ...
+
+    hazard:
+        flood:
+            enable: False
+        landslide:
+            enable: True
+        TC:
+            enable: False
+    ...
 
 
 
