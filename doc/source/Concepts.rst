@@ -77,7 +77,7 @@ A total of 175 years (up to 2022) Tropical cyclone (TC) records are used. Additi
 --------
 Landslide is obtained from NASA Global Landslide Catalog (Points). It records most landslides globally. For New Zealand, there are a total of 164 events recorded spanning from 1979 to 2018. All the events are shown below:
 
-.. image:: img/landslide.png
+.. image:: img/landslide2.png
    :width: 300
 
 2.3 Flood
