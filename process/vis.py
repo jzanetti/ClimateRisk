@@ -57,7 +57,7 @@ def plot_wrapper(cfg: dict, workdir: str, exp_objs: dict, add_basemap: bool = Fa
                     print("plotting landslide ...")
                     plot_landslide(workdir, exp_objs[hazard_name]["hazard"], basemap)
                 if hazard_name == "flood":
-                    print("plotting flood ...")
+                    print("plotting flood (this may take very long to complete) ...")
                     exp_objs[hazard_name]["hazard"].plot_intensity(event=0)
                     plt.savefig(join(workdir, "flood.png"))
                     plt.close()
