@@ -69,9 +69,9 @@ Currently in **ClimateRisk**, three types of hazards are pre-defined: **TC**, **
 2.1 Tropical cyclone (TC)
 --------
 A total of 175 years (up to 2022) Tropical cyclone (TC) records are used. Additionally, pertubated cyclone tracks are added in the dataset. An example of **TC** tracks is shown below:
+|ImageLink|_
 
-.. image:: img/TC_tracks.png
-   :width: 400
+.. |ImageLink| image:: img/TC_tracks.png
 
 2.2 Landslide
 --------
