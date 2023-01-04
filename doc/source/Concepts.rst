@@ -148,3 +148,5 @@ For flood, the following impact function is defined as below
 
 The unit of flood intensity is ``m``, when the intensity is over approximate ``1 m``, the impact (e.g., ``MDD``) from the event signifciantly increases.
 
+In **ClimateRisk**, impact function is automatically determined by the predefined hazard type.
+

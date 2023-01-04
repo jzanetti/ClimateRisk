@@ -111,11 +111,10 @@ def get_exp_obj_latlon(exp_obj: Exposures) -> dict:
         }
 
 
-def update_exposure(cfg: dict, exp_obj: Exposures, impacts: dict, hazards: dict) -> dict:
+def update_exposure(exp_obj: Exposures, impacts: dict, hazards: dict) -> dict:
     """Combining Exposure with Impact function
 
     Args:
-        cfg (dict): climaterisk configuration
         exp_obj (Exposures): Exposure object
         impact_func (dict): Impact function in a dict
 
