@@ -103,4 +103,48 @@ The type of **Hazard** can be defined in the configuration file. For example, in
     ...
 
 
+3. Impact function
+=========
+An impact function relates the percentage of damage in the exposure caused by an hazard (or a type of hazard). 
+It is also referred as a "vulnerability curve" in the modelling community.
+
+There are two main metrics in a impact function:
+
+- ``MDD``: Mean damage (impact) degree for each intensity.
+- ``PAA``: Percentage of affected assets (exposures) for each intensity.
+- ``MDR``: ``MDR=MDD * PAA`` is the mean damage ratio.
+
+There are a few predefined impact functions in **ClimateRisk** (by **CLIMADA**).
+
+3.1 Tropical cyclone (TC)
+--------
+
+For Tropical cyclone, the impact function is defined using `Emanuel (2011) <https://journals.ametsoc.org/view/journals/wcas/3/4/wcas-d-11-00007_1.xml>`_.
+
+.. image:: img/TC_impact_func.png
+   :width: 300
+
+The above figure shows that the analysis TC intensity range (wind speed) is between 0 m/s and 120 m/s. 
+``PAA`` is always 100%, meaning that all areas of exposure will be affected if there is a TC event.
+``MDD`` indicates that the TC start brining more significant impact when the TC intensity is more than 40 m/s.
+
+3.2 Landslide
+--------
+
+For landslide, an customized impact function is defined (in ``process/impact.py``).
+
+.. image:: img/landslide_impactfunc.png
+   :width: 300
+
+The intensity of landside is ranging from 0 to 1. When a landslide occurs, all areas of exposure will be affected while it only brings significant impacts when the landslide intensity is more than 0.5.
+
+3.3 Flood
+--------
+
+For flood, the following impact function is defined as below
+
+.. image:: img/flood_impact_func.png
+   :width: 300
+
+The unit of flood intensity is ``m``, when the intensity is over approximate ``1 m``, the impact (e.g., ``MDD``) from the event signifciantly increases.
 

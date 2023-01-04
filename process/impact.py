@@ -42,7 +42,7 @@ def get_impact(hazard_cfg: dict) -> dict:
     return impf_set
 
 
-def flood_impact_func() -> ImpactFunc:
+def flood_impact_func(oceania_func_id: int = 5) -> ImpactFunc:
     """Flood impact function
 
     Args:
@@ -52,7 +52,7 @@ def flood_impact_func() -> ImpactFunc:
         _type_: _description_
     """
     impf_set = flood_imp_func_set()
-    return impf_set.get_func(fun_id=6)[0]
+    return impf_set.get_func(fun_id=oceania_func_id)[0]
 
 
 def calculate_impact_func(exposure_objs: dict) -> Impact_type:

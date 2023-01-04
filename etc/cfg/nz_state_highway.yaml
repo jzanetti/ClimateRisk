@@ -13,16 +13,16 @@ hazard:
   flood:
     enable: False
   landslide:
-    enable: True
-  TC:
     enable: False
+  TC:
+    enable: True
 
 vis:
   basemap: etc/data/nz_coastlines/nz-coastlines-and-islands-polygons-topo-150k.shp
   exposure:
     enable: False
   hazard:
-    enable: True
+    enable: False
   impact:
     enable: False
 
