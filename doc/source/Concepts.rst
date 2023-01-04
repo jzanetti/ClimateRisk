@@ -68,21 +68,21 @@ Currently in **ClimateRisk**, three types of hazards are pre-defined: **TC**, **
 
 2.1 Tropical cyclone (TC)
 --------
-A total of 175 years (up to 2022) Tropical cyclone (TC) records are used. Additionally, pertubated cyclone tracks are added in the dataset. An example of **TC** tracks is shown below:
-|ImageLink|_
+A total of 175 years (up to 2022) Tropical cyclone (TC) records are used. Additionally, pertubated cyclone tracks are added in the dataset. Note that the dataset might not be comprehensive. An example of **TC** tracks is shown below:
 
-.. |ImageLink| image:: img/TC_tracks.png
+.. image:: img/TC_tracks.png
+   :width: 400
 
 2.2 Landslide
 --------
-Landslide is obtained from NASA Global Landslide Catalog (Points). It records most landslides globally (For New Zealand, the data for the last 30 years are included).
+Landslide is obtained from NASA Global Landslide Catalog (Points). It records most landslides globally. For New Zealand, there are a total of 164 events recorded spanning from 1979 to 2018. All the events are shown below:
 
 .. image:: img/landslide.png
    :width: 300
 
 2.3 Flood
 --------
-Landslide is obtained from NASA Global Landslide Catalog (Points). It records most landslides globally (For New Zealand, the data for the last 30 years are included).
+The runoff was used to derive spatially explicit flood depth (FLDDPH) and flooded fraction (FLDFRC) of the maximum flood event of each year on 150 arcsec (~ 5 km). For the New Zealand events, a total of 40 events spanning from 1971 and 2010 are recorded.
 
 .. image:: img/flood.png
    :width: 350

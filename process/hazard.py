@@ -122,6 +122,11 @@ def get_landslide(
 
     landslide_gdf_all.to_file(tmp_file)
 
+    #from datetime import datetime
+    #x = landslide_gdf_all["ev_date"].to_list()
+    #x = list(filter(None, x))
+    #[datetime.strptime(xx, "%Y-%m-%d") for xx in x]
+
     landslide = Landslide.from_hist(bbox=domain, input_gdf=tmp_file, res=res)
 
     remove(tmp_file)

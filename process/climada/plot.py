@@ -11,8 +11,9 @@ import climada.util.coordinates as u_coord
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from textwrap import wrap
 from numpy import max as numpy_max
+from numpy import mean as numpy_mean
 
-from matplotlib.pyplot import savefig, close
+from matplotlib.pyplot import savefig, close, colorbar
 from os.path import join
 from climada.hazard.tc_tracks import TCTracks as TCTracks_type
 from climada.engine.impact import Impact as Impact_type
@@ -221,13 +222,13 @@ def plot_landslide(workdir: str, landslide_obj: Exposures, basemap: GeoDataFrame
     """
     base_ax = None
     if basemap is not None:
-        base_ax = basemap.plot(color='white', edgecolor='black')
+        base_ax = basemap.plot(color='white', edgecolor='black', figsize=(15, 10))
 
     landslide_obj._set_coords_centroids()
     landslide_coord = landslide_obj.centroids.coord
     landslide_value = landslide_obj.intensity.toarray()
-    landslide_value = numpy_max(landslide_value, 0)
-
+    landslide_value = numpy_mean(landslide_value, 0)
+    # landslide_date = landslide_obj.date.values
 
     data_len = len(landslide_value)
 
@@ -241,7 +242,7 @@ def plot_landslide(workdir: str, landslide_obj: Exposures, basemap: GeoDataFrame
             lons.append(landslide_coord[i][1])
             values.append(proc_value)
     
-    base_ax.scatter(lons, lats, c="r")
+    base_ax.scatter(lons, lats, cmap="jet", edgecolors="k")
 
     title("Landslide")
 
