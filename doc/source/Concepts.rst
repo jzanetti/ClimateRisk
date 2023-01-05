@@ -150,3 +150,66 @@ The unit of flood intensity is ``m``, when the intensity is over approximate ``1
 
 In **ClimateRisk**, impact function is automatically determined by the predefined hazard type.
 
+
+4. Cost benefit
+=========
+**Cost benefit** allows an user to compare different hazard adaptation options.
+
+- When a **cost-benefit** ratio < 1, the cost is less than the benefit so the adaptation approach is considered a worthwhile investment (Smaller ratios therefore represent better investments).
+- When a **cost-benefit** ratio > 1, the cost is more than the benefit and the offset losses are less than the cost of the adaptation measure: based on the financials alone (the measure may not be worth it).
+
+4.1 A simple cost-benefit
+--------
+
+.. math::
+
+    \frac{cost}{benefit} = \frac{cost}{N * (AAI^{without adaptation} - AAI^{with adaptation})}
+
+Where ``N`` is the number of years, the ``AAI`` is the Average Annual Impact from your hazard event set on the exposure.
+
+
+.. note::
+
+    Whether an adaptation measure is seen to be effective might depend on the number of years you are evaluating the cost-benefit over. 
+    For example, a $50 investment that prevents an average of $1 losses per year will only "break even" after ``N=50`` years. Details
+    can be accessed from `CLIMADA <https://wcr.ethz.ch/research/climada.html>`_.
+
+4.2 Time dependant cost-benefit
+--------
+
+Sometimes **Cost-benefit** calculation will want to describe a climate and exposure that also change over time.
+In such case, it does not assume that the user will have explicit hazard and impact objects for every year in the study period, 
+and so interpolates between the impacts at the start and the end of the period of interest.
+
+.. math::
+
+    \sum_{t=T_0}^{T_1} a(t)(AAI^{with adaptation}_{T_1} - AAI^{with adaptation}_{T_0} ) - N * AAI^{without adaptation}_{T_0}
+
+Where ``a(t)`` is a function of the year ``t`` describing the interpolation of hazard and exposure between :math:`T_0` and :math:`T_1`.
+It is usually defined as:
+
+.. math::
+
+    a_{k}(t) = \frac{(t - T_0)^{k}} {T_1 - T_0}^{k}
+
+the choice (usually defined by user) determins how quickly the transition occurs between the present and future:
+
+- ``k=1``: the function is a straightline (the change rate over time is stable). 
+- ``k>1``: the change begins slowly and speeds up over time.
+- ``k<1``: the change begins quickly and slows over time.
+
+4.3 Discount rates
+--------
+
+The discount rate tries to formalise an idea from economics that says that a gain in the future is worth less to us than the same gain right now. 
+For example, paying $1 to offset $2 of economic losses next year is **worth more** than paying $1 to offset $2 of economic losses in 2080.
+
+There are three main ideas around discount rates:
+
+- The most widley used discount rate in climate change economics is **1.4%** as proposed by the Stern Review (2006). 
+- Neoliberal economists around Nordhaus (2007) claim that rates should be higher, around **4.3%**, reflecting continued economic growth and a society that will be better at adapting in the future compared to now. 
+- Environmental economists argue that future costs shouldn **not** be discounted at all.
+
+The **discount rates** can be considered in **Cost-benefits** calculation, details can be accessed `here <https://climada-python.readthedocs.io/en/stable/tutorial/climada_engine_CostBenefit.html#Discount-rates>`_.
+
+
