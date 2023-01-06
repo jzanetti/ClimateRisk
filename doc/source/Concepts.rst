@@ -216,3 +216,43 @@ There are three main ideas around discount rates:
 The **discount rates** can be considered in **Cost-benefits** calculation, details can be accessed `here <https://climada-python.readthedocs.io/en/stable/tutorial/climada_engine_CostBenefit.html#Discount-rates>`_.
 
 
+5. Adaptation
+=========
+
+**Adaptation measures** are defined by parameters that alter the exposures, hazard or impact functions.
+
+An adapation measure is usually described as:
+
+
+- **Description**:
+    - ``name``: name of the action.
+    - ``haz_type``: hazard type (e.g., landslide).
+    - ``cost``: discounted cost repqted to the exposure.
+
+- **Source**:
+    - ``hazard_set``: file name of hazard to use (in ``h5`` format).
+    - ``exposure_set``: file name of exposure to use (in ``h5`` format).
+
+- **impact functions transformation**:
+    - ``hazard_inten_imp``: parameter a and b of hazard intensity change (in ``tuple``).
+    - ``mdd_impact``: parameter a and b of the impact over the mean damage degree (in ``tuple``).
+    - ``paa_impact``: parameter a and b of the impact over the percentage of affected assets (in ``tuple``).
+
+All three aspects in a impact function can be modified using the above three parameters:
+
+.. code-block:: python
+
+    intensity = intensity*hazard_inten_imp[0] + hazard_inten_imp[1]
+    mdd = mdd*mdd_impact[0] + mdd_impact[1]
+    paa = paa*paa_impact[0] + paa_impact[1]
+
+
+- **Hazard modification**:
+- ``hazard_freq_cutoff``: hazard frequency cutoff (in ``float``): the hazard intensity is set to 0 when its ``impact exceedance frequency`` are greater than ``hazard_freq_cutoff``.
+- ``imp_fun_map``: change of impact function id.
+- ``exp_region_id``: region id of the selected exposures to consider ALL the previous parameters.
+- ``risk_transf_attach``: risk transfer attachment. Applies to the whole exposure.
+- ``risk_transf_cover``: risk transfer cover. Applies to the whole exposure.
+
+
+
