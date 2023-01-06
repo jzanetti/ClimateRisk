@@ -8,6 +8,7 @@ from geopandas import GeoDataFrame
 from climada.entity import ImpactFunc
 from numpy import linspace, sort, array
 from climada_petals.entity.impact_funcs.river_flood import flood_imp_func_set
+from process.adaptation import define_adaptation
 
 def get_impact(hazard_cfg: dict) -> dict:
     """Return an impact function

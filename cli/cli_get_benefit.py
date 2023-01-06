@@ -14,6 +14,7 @@ import argparse
 from process.exposure import get_exposure, update_exposure
 from process.hazard import get_hazard
 from process.impact import get_impact, calculate_impact_func
+from process.adaptation import define_adaptation
 from os.path import exists, join
 from os import makedirs
 from process.utils import read_cfg
@@ -71,6 +72,9 @@ def get_data():
 
     print("Obtain impact based on hazard...")
     impacts = get_impact(cfg["hazard"])
+
+    print("Obtain adaptation ...")
+    adaptations = define_adaptation(cfg["adaptation"])
 
     print("Combining exposure, impact and hazard ...")
     exp_objs = update_exposure(exp_obj, impacts, hazards)

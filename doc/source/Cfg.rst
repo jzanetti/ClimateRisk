@@ -56,3 +56,23 @@ An impact function will be assigned automatically depending on the required ``ha
 
    Note that for the New Zealand state highway, the total length is 11,000 kilometres (`ref <https://www.nzta.govt.nz/roads-and-rail/research-and-data/state-highway-frequently-asked-questions/>`_.), and
    the total estimated asset value is NZD$52 billion (`ref <https://www.nzta.govt.nz/planning-and-investment/national-land-transport-programme/2021-24-nltp/activity-classes/state-highway-maintenance/>`_).
+
+Calculating Cost-benefit
+============
+
+For calculating the cost-benefit for an adaptation measure, in addition to the configuration for impact calculation (as above), the adaptation configuration section
+must be included. For example, we can define the following adaptation for TC (wind):
+
+.. code-block:: yaml
+
+    adaptation:
+        TC_wind:
+            mdd_impact: (1, 0)
+            paa_impact: (1, -0.15)
+            hazard_inten_imp: (1, -10)
+            cost: 10000
+            color_rgb: (1, 1, 1)
+
+Details about how to define a adaptation configuration can be found in `Adaptation <https://climaterisk.readthedocs.io/en/latest/Concepts.html#Adaptation>`_.
+
+

@@ -246,13 +246,32 @@ All three aspects in a impact function can be modified using the above three par
     mdd = mdd*mdd_impact[0] + mdd_impact[1]
     paa = paa*paa_impact[0] + paa_impact[1]
 
-
 - **Hazard modification**:
 - ``hazard_freq_cutoff``: hazard frequency cutoff (in ``float``): the hazard intensity is set to 0 when its ``impact exceedance frequency`` are greater than ``hazard_freq_cutoff``.
 - ``imp_fun_map``: change of impact function id.
 - ``exp_region_id``: region id of the selected exposures to consider ALL the previous parameters.
 - ``risk_transf_attach``: risk transfer attachment. Applies to the whole exposure.
 - ``risk_transf_cover``: risk transfer cover. Applies to the whole exposure.
+
+The adapation is configurated via the adaptation configuration section. For example,
+
+.. code-block:: yaml
+
+    adaptation:
+        TC_wind:
+            mdd_impact: (1, 0)
+            paa_impact: (1, -0.15)
+            hazard_inten_imp: (1, -10)
+            cost: 10000
+            color_rgb: (1, 1, 1)
+
+Here the adapation measure for ``TC(wind)`` is defined with:
+
+- Unchanged Mean damage degree (``mdd_impact``)
+- Reduced (by 15%) Percentage of affected assets (``paa_impact``)
+- Reduced (by 10/unit) Hazard intensity (``hazard_inten_imp``)
+- The cost for this measure is $10000
+- The color used to represent this measure is ``(1, 1, 1)``
 
 
 

@@ -17,6 +17,15 @@ hazard:
   TC_wind:
     enable: True
 
+adaptation:
+  TC_wind:
+    mdd_impact: (1, 0)
+    paa_impact: (1, -0.15)
+    hazard_inten_imp: (1, -10)
+    cost: 10000
+    color_rgb: (1, 1, 1)
+
+
 vis:
   basemap: etc/data/nz_coastlines/nz-coastlines-and-islands-polygons-topo-150k.shp
   exposure:
