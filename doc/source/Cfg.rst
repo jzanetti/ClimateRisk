@@ -23,7 +23,7 @@ The configuration file must be defined before any impact assessment tasks. A bas
     hazard:
         landslide:
             enable: True
-        TC:
+        TC_track:
             enable: True
         flood:
             enable: True

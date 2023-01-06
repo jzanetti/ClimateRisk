@@ -98,9 +98,12 @@ The type of **Hazard** can be defined in the configuration file. For example, in
             enable: False
         landslide:
             enable: True
-        TC:
+        TC_track:
             enable: False
     ...
+
+Note that there is an API provided by **CLIMADA** to easily extract hazard data (for types such as ``tropical_cyclone``, ``earthquake``, ``river_flood``, `wildfire`, ``flood``). 
+Details can be obtained at `Climada-petals <https://climada-python.readthedocs.io/en/stable/tutorial/climada_engine_CostBenefit.html#Download-hazard>`_.
 
 
 3. Impact function

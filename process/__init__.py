@@ -1,9 +1,16 @@
-LITPOP_DOMAIN = "New Zealand"
-TC_PROVIDOR = "wellington"
+RISK_COUNTRY = "New Zealand"
+FUTURE_YEARS = 2080
+
+
 TC_DATA = {
-    "provider": "wellington",
-    "year_range": None, # # 2010-2012 or None
-    "pert_tracks": 1
+    "track": {
+        "provider": "wellington",
+        "year_range": None, # # 2010-2012 or None
+        "pert_tracks": 1
+    },
+    "wind": {
+        "pert_tracks": 10
+    }
 }
 
 LANDSLIDE_DATA = "etc/data/nasa_global_landslide_catalog_point/nasa_global_landslide_catalog_point.shp"

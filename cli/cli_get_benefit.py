@@ -1,5 +1,5 @@
 """
-Usage: get_impact
+Usage: get_benefit
             --workdir /tmp/climaterisk_data
             --job show
 
@@ -21,16 +21,16 @@ from process.vis import plot_wrapper
 
 def get_example_usage():
     example_text = """example:
-        * get_impact
+        * get_benefit
             --workdir /tmp/climaterisk_data
-            --cfg nz_state_highway.yaml
+            --cfg nz_state_highway_cost_benefit.yaml
         """
     return example_text
 
 
 def setup_parser():
     parser = argparse.ArgumentParser(
-        description="Impact calculation from ClimadaRisk",
+        description="Cost-benefit calculation from ClimadaRisk",
         epilog=get_example_usage(),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -48,7 +48,7 @@ def setup_parser():
     return parser.parse_args(
         [
             "--workdir", "/tmp/climaterisk",
-            "--cfg", "etc/cfg/nz_state_highway_impact.yaml"
+            "--cfg", "etc/cfg/nz_state_highway_cost_benefit.yaml"
         ]
     )
 
@@ -64,7 +64,7 @@ def get_data():
         makedirs(workdir)
 
     print("Get exposures ...")
-    exp_obj = get_exposure(cfg["input"])["hist"]
+    exp_obj = get_exposure(cfg["input"], add_future=True)
 
     print("Get hazard ...")
     hazards = get_hazard(cfg["hazard"]) 

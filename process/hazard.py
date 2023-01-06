@@ -3,11 +3,11 @@ from process.vis import plot_tc
 from climada.hazard.tc_tracks import TCTracks as TCTracks_type
 from process.utils import str2list_for_year
 from os import remove
-from process import LANDSLIDE_DATA, TC_DATA, FLOOD_DATA
+from process import LANDSLIDE_DATA, TC_DATA, FLOOD_DATA, RISK_COUNTRY, FUTURE_YEARS
 from geopandas import read_file
 from process.climada_petals.landslide import Landslide
 from pickle import load as pickle_load
-
+from climada.util.api_client import Client
 
 def get_hazard(hazard_cfg: dict) -> dict:
     """Get hazard
@@ -31,9 +31,13 @@ def get_hazard(hazard_cfg: dict) -> dict:
         if not proc_hazard_cfg["enable"]:
             continue
 
-        if proc_hazard_name == "TC":
+        if proc_hazard_name == "TC_track":
 
-            hazards[proc_hazard_name] = get_tc()
+            hazards[proc_hazard_name] = get_tc(tc_type="track")
+
+        elif proc_hazard_name == "TC_wind":
+
+            hazards[proc_hazard_name] = get_tc(tc_type="wind")
 
         elif proc_hazard_name == "landslide":
 
@@ -49,33 +53,54 @@ def get_hazard(hazard_cfg: dict) -> dict:
     return hazards
 
 
-def get_tc(smooth_factor: float = 0.5) -> TCTracks_type:
+def get_tc(tc_type: str, smooth_factor: float = 0.5) -> dict:
     """Get TC from a certain provider
 
     Returns:
         _type_: _description_
     """
 
-    # Load histrocial tropical cyclone tracks from ibtracs over the North Atlantic basin between 2010-2012
-    tc = TCTracks.from_ibtracs_netcdf(
-        provider=TC_DATA["provider"], 
-        year_range=str2list_for_year(TC_DATA["year_range"]), 
-        estimate_missing=True)
+    if tc_type == "track":
 
-    # Interpolation to make the track smooth and to allow applying calc_perturbed_trajectories
-    tc.equal_timestep(smooth_factor)
+        hazard_hist = TCTracks.from_ibtracs_netcdf(
+            provider=TC_DATA["track"]["provider"], 
+            year_range=str2list_for_year(TC_DATA["track"]["year_range"]), 
+            estimate_missing=True)
 
-    # Add randomly generated tracks using the calc_perturbed_trajectories method (1 per historical track)
-    tc.calc_perturbed_trajectories(
-        nb_synth_tracks=TC_DATA["pert_tracks"])
+        hazard_hist.equal_timestep(smooth_factor)
 
-    return tc
+        hazard_hist.calc_perturbed_trajectories(
+            nb_synth_tracks=TC_DATA["track"]["pert_tracks"])
+
+        hazard_future = None
+
+    elif tc_type == "wind":
+
+        client = Client()
+
+        hazard_hist = client.get_hazard(
+            "tropical_cyclone",
+            properties={
+                "country_name": RISK_COUNTRY,
+                "climate_scenario": "historical",
+                "nb_synth_tracks": str(TC_DATA["wind"]["pert_tracks"])
+            }
+        )
+        hazard_future = client.get_hazard(
+            "tropical_cyclone",
+            properties={
+                "country_name": RISK_COUNTRY,
+                "climate_scenario": "rcp85",
+                "ref_year": str(FUTURE_YEARS),
+                "nb_synth_tracks": str(TC_DATA["wind"]["pert_tracks"])})
+
+    return {"hist": hazard_hist, "future": hazard_future}
 
 
 def get_landslide(
     tmp_file: str = "/tmp/ls.shp", 
     domain: tuple = (160.0, -50.0, 180.0, -30.0), 
-    res: float = 0.01) -> Landslide:
+    res: float = 0.01) -> dict:
     """Get landslide
 
     Args:
@@ -99,16 +124,19 @@ def get_landslide(
 
     remove(tmp_file)
 
-    return landslide
+    return {"hist": landslide, "future": None}
 
 
-def get_riverflood():
+def get_riverflood() -> dict:
     """Get river flood
 
     Returns:
         _type_: _description_
     """
-    return pickle_load(open(FLOOD_DATA, "rb"))
+    flood_data = pickle_load(open(FLOOD_DATA, "rb"))
+
+
+    return {"hist": flood_data, "future": None}
 
 
 

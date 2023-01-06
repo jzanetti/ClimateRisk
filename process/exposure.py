@@ -1,5 +1,5 @@
 from climada.util.api_client import Client
-from process import LITPOP_DOMAIN
+from process import RISK_COUNTRY, FUTURE_YEARS
 from climada.entity.exposures.base import Exposures
 from process.utils import get_hazard_info, check_exposure_value
 from climada.entity.impact_funcs import impact_func_set
@@ -19,7 +19,7 @@ from process.utils import gdf2centroids
 from pickle import load as pickle_load
 from process import GDP2ASSET_DATA
 
-
+from copy import deepcopy
 
 def apply_asset_to_exposure(exp_obj: GeoDataFrame, litpop_obj: GeoDataFrame) -> GeoDataFrame:
     """Apply Litpop/gdp2asset value to an exposure
@@ -53,7 +53,7 @@ def apply_asset_to_exposure(exp_obj: GeoDataFrame, litpop_obj: GeoDataFrame) -> 
     return gdf
 
 
-def get_exposure(input_cfg: dict) -> Exposures:
+def get_exposure(input_cfg: dict, add_future: bool = False) -> Exposures:
     """Get exposure object
 
     Args:
@@ -99,7 +99,34 @@ def get_exposure(input_cfg: dict) -> Exposures:
 
         exp_obj.gdf = apply_asset_to_exposure(exp_obj.gdf, ref_obj.gdf)
 
-    return exp_obj
+    future_exp_obj = None
+    if add_future:
+        future_exp_obj = add_future_exp(exp_obj) 
+
+    return {"hist": exp_obj, "future": future_exp_obj}
+
+
+def add_future_exp(exp_present: Exposures, annual_growth_rate: float = 1.02) -> Exposures:
+    """_summary_
+
+    Args:
+        exp_present (Exposures): _description_
+        annual_growth_rate (float, optional): _description_. Defaults to 1.02.
+
+    Returns:
+        Exposures: _description_
+    """
+    exp_future = deepcopy(exp_present)
+
+    exp_future.ref_year = FUTURE_YEARS
+
+    n_years = exp_future.ref_year - exp_present.ref_year + 1
+
+    growth = annual_growth_rate ** n_years
+
+    exp_future.gdf["value"] = exp_future.gdf["value"] * growth
+
+    return exp_future
 
 
 def get_exp_obj_latlon(exp_obj: Exposures) -> dict:
@@ -128,12 +155,12 @@ def update_exposure(exp_obj: Exposures, impacts: dict, hazards: dict) -> dict:
         
         exposure_obj = assign_impact(exp_obj, impacts[hazard_name])
         
-        exp_centroids = gdf2centroids(exposure_obj.gdf)
-        
-        if hazard_name == "TC":
-            update_hazard = TropCyclone.from_tracks(hazards[hazard_name], centroids=exp_centroids)
+        if hazard_name == "TC_track":
+            update_hazard = TropCyclone.from_tracks(
+                hazards[hazard_name]["hist"], 
+                centroids=gdf2centroids(exposure_obj.gdf))
         elif hazard_name in ["landslide", "flood"]:
-            update_hazard = hazards[hazard_name]
+            update_hazard = hazards[hazard_name]["hist"]
         else:
             raise Exception(f"Hazard {hazard_name} is not supported yet ...")
 
@@ -141,7 +168,7 @@ def update_exposure(exp_obj: Exposures, impacts: dict, hazards: dict) -> dict:
             "exposure": exposure_obj,
             "impact": impacts[hazard_name],
             "updated_hazard": update_hazard,
-            "hazard": hazards[hazard_name]
+            "hazard": hazards[hazard_name]["hist"]
         }
 
     return outputs
@@ -179,7 +206,7 @@ def get_from_litpop(latlon: dict or None = None) -> Exposures:
         Exposures: Exposures based on LitPop
     """
     client = Client()
-    litpop_obj = client.get_litpop(country=LITPOP_DOMAIN)
+    litpop_obj = client.get_litpop(country=RISK_COUNTRY)
 
     if latlon is not None:
         gdf = litpop_obj.gdf

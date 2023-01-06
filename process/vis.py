@@ -36,7 +36,7 @@ def plot_wrapper(cfg: dict, workdir: str, exp_objs: dict, add_basemap: bool = Fa
 
         if proc_vis_name == "exposure":
             for proc_exp in exp_objs:
-                plot_exposure(workdir, proc_exp, basemap)
+                plot_exposure(workdir, exp_objs[proc_exp]["exposure"], basemap)
 
         if proc_vis_name == "impact":
             for hazard_name in exp_objs:

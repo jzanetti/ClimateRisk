@@ -27,12 +27,15 @@ def get_impact(hazard_cfg: dict) -> dict:
 
         impf_set[proc_hazard_name] = ImpactFuncSet()
 
-        if proc_hazard_name == "TC":
+        if proc_hazard_name in ["TC_track", "TC_wind"]:
             proc_func = ImpfTropCyclone.from_emanuel_usa()
+
         elif proc_hazard_name == "landslide":
             proc_func = landslide_impact_func()
+
         elif proc_hazard_name == "flood":
             proc_func = flood_impact_func()
+
         else:
             raise Exception(f"Hazard type {proc_hazard_name} is not supported yet ...")
 
@@ -52,6 +55,7 @@ def flood_impact_func(oceania_func_id: int = 5) -> ImpactFunc:
         _type_: _description_
     """
     impf_set = flood_imp_func_set()
+
     return impf_set.get_func(fun_id=oceania_func_id)[0]
 
 
