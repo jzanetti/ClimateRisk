@@ -19,12 +19,20 @@ hazard:
 
 adaptation:
   TC_wind:
-    mdd_impact: (1, 0)
-    paa_impact: (1, -0.15)
-    hazard_inten_imp: (1, -10)
-    cost: 10000
-    color_rgb: (1, 1, 1)
-
+    measure1:
+      mdd_impact: (1, 0)
+      paa_impact: (1, -0.15)
+      hazard_inten_imp: (1, -10)
+      cost: 10000
+      color_rgb: (1, 1, 1)
+      discount_rate: 0.014
+    measure2:
+      mdd_impact: (1, 0)
+      paa_impact: (1, -0.3)
+      hazard_inten_imp: (1, -10)
+      cost: 5000
+      color_rgb: (0, 0, 0)
+      discount_rate: 0.014
 
 vis:
   basemap: etc/data/nz_coastlines/nz-coastlines-and-islands-polygons-topo-150k.shp

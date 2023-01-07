@@ -1,7 +1,7 @@
 """
 Usage: get_benefit
             --workdir /tmp/climaterisk_data
-            --job show
+            --cfg etc/cfg/nz_state_highway_cost_benefit.yaml
 
 Author: Sijin Zhang
 
@@ -13,12 +13,12 @@ Description:
 import argparse
 from process.exposure import get_exposure, update_exposure
 from process.hazard import get_hazard
-from process.impact import get_impact, calculate_impact_func
-from process.adaptation import define_adaptation
+from process.impact import get_impact
+from process.adaptation import define_adaptation, set_discount_rates, calculate_cost_benefit
 from os.path import exists, join
 from os import makedirs
 from process.utils import read_cfg
-from process.vis import plot_wrapper
+from process.vis import plot_cost_benefit_wrapper
 
 def get_example_usage():
     example_text = """example:
@@ -74,16 +74,20 @@ def get_data():
     impacts = get_impact(cfg["hazard"])
 
     print("Obtain adaptation ...")
-    adaptations = define_adaptation(cfg["adaptation"])
+    adaptations = define_adaptation(cfg["adaptation"], impacts)
 
-    print("Combining exposure, impact and hazard ...")
-    exp_objs = update_exposure(exp_obj, impacts, hazards)
+    print("Obtain discount rates ...")
+    discount_rates = set_discount_rates(exp_obj, cfg["adaptation"])
 
-    print("Calculating impacts ...")
-    exp_objs = calculate_impact_func(exp_objs)
+    print("Combining exposure, impact and hazard for both hist and future ...")
+    for exp_flag in ["hist", "future"]:
+        exp_obj[exp_flag] = update_exposure(exp_obj, impacts, hazards, exp_flag=exp_flag)
+
+    print("Calculating cost-benefit ...")
+    cost_benefit_objs = calculate_cost_benefit(exp_obj, adaptations, discount_rates)
 
     print("Visualization ...")
-    plot_wrapper(cfg, workdir, exp_objs, add_basemap=True)
+    plot_cost_benefit_wrapper(cfg, workdir, exp_obj, cost_benefit_objs, discount_rates)
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 """
 Usage: get_impact
             --workdir /tmp/climaterisk_data
-            --job show
+            --cfg etc/cfg/nz_state_highway_impact.yaml
 
 Author: Sijin Zhang
 
@@ -17,7 +17,7 @@ from process.impact import get_impact, calculate_impact_func
 from os.path import exists, join
 from os import makedirs
 from process.utils import read_cfg
-from process.vis import plot_wrapper
+from process.vis import plot_impact_wrapper
 
 def get_example_usage():
     example_text = """example:
@@ -79,7 +79,7 @@ def get_data():
     exp_objs = calculate_impact_func(exp_objs)
 
     print("Visualization ...")
-    plot_wrapper(cfg, workdir, exp_objs, add_basemap=True)
+    plot_impact_wrapper(cfg, workdir, exp_objs, add_basemap=True)
 
 
 if __name__ == "__main__":

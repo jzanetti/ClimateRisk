@@ -18,7 +18,6 @@ from process.utils import gdf2centroids
 
 from pickle import load as pickle_load
 from process import GDP2ASSET_DATA
-
 from copy import deepcopy
 
 def apply_asset_to_exposure(exp_obj: GeoDataFrame, litpop_obj: GeoDataFrame) -> GeoDataFrame:
@@ -138,7 +137,11 @@ def get_exp_obj_latlon(exp_obj: Exposures) -> dict:
         }
 
 
-def update_exposure(exp_obj: Exposures, impacts: dict, hazards: dict) -> dict:
+def update_exposure(
+    exp_obj: Exposures, 
+    impacts: dict, 
+    hazards: dict,
+    exp_flag: str = "hist") -> dict:
     """Combining Exposure with Impact function
 
     Args:
@@ -153,14 +156,14 @@ def update_exposure(exp_obj: Exposures, impacts: dict, hazards: dict) -> dict:
 
     for hazard_name in impacts:
         
-        exposure_obj = assign_impact(exp_obj, impacts[hazard_name])
+        exposure_obj = assign_impact(exp_obj[exp_flag], impacts[hazard_name])
         
         if hazard_name == "TC_track":
             update_hazard = TropCyclone.from_tracks(
-                hazards[hazard_name]["hist"], 
+                hazards[hazard_name][exp_flag], 
                 centroids=gdf2centroids(exposure_obj.gdf))
-        elif hazard_name in ["landslide", "flood"]:
-            update_hazard = hazards[hazard_name]["hist"]
+        elif hazard_name in ["landslide", "flood", "TC_wind"]:
+            update_hazard = hazards[hazard_name][exp_flag]
         else:
             raise Exception(f"Hazard {hazard_name} is not supported yet ...")
 
@@ -168,7 +171,7 @@ def update_exposure(exp_obj: Exposures, impacts: dict, hazards: dict) -> dict:
             "exposure": exposure_obj,
             "impact": impacts[hazard_name],
             "updated_hazard": update_hazard,
-            "hazard": hazards[hazard_name]["hist"]
+            "hazard": hazards[hazard_name][exp_flag]
         }
 
     return outputs

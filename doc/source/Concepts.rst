@@ -259,19 +259,22 @@ The adapation is configurated via the adaptation configuration section. For exam
 
     adaptation:
         TC_wind:
-            mdd_impact: (1, 0)
-            paa_impact: (1, -0.15)
-            hazard_inten_imp: (1, -10)
-            cost: 10000
-            color_rgb: (1, 1, 1)
+            measure1:
+                mdd_impact: (1, 0)
+                paa_impact: (1, -0.15)
+                hazard_inten_imp: (1, -10)
+                cost: 10000
+                color_rgb: (1, 1, 1)
+                discount_rate: 0.014
 
-Here the adapation measure for ``TC(wind)`` is defined with:
+Here the adapation measure for ``measure1`` (there is only one measure under ``TC_wind``) is defined with:
 
 - Unchanged Mean damage degree (``mdd_impact``)
 - Reduced (by 15%) Percentage of affected assets (``paa_impact``)
 - Reduced (by 10/unit) Hazard intensity (``hazard_inten_imp``)
-- The cost for this measure is $10000
-- The color used to represent this measure is ``(1, 1, 1)``
+- The ``cost`` for this measure is $10000.
+- The color (``color_rgb``) used to represent this measure is (1, 1, 1).
+- The discount rate (``discount_rate``) is 0.014.
 
 
 

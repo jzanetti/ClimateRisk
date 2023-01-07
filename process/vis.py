@@ -7,9 +7,84 @@ from geopandas import GeoDataFrame
 import matplotlib.pyplot as plt
 from process.utils import read_basemap, get_exposure_range
 from process.climada.plot import plot_tc, plot_scattered_data, plot_landslide
+from climada.engine.cost_benefit import risk_aai_agg
+from numpy import array
 
+def plot_cost_benefit_wrapper(cfg: dict, workdir: str, exp_objs: dict, cost_benefit_objs: dict, discount_rates: dict):
 
-def plot_wrapper(cfg: dict, workdir: str, exp_objs: dict, add_basemap: bool = False):
+    # costben.plot_waterfall(exp_objs["hist"][hazard_name]["hazard"], adaptation_measure_objs["hist"], exp_objs["future"][hazard_name]["hazard"], adaptation_measure_objs["future"],
+    #                           risk_func=risk_aai_agg)
+
+    for hazard_type in cost_benefit_objs["cost_benefit"]:
+
+        # plot event view
+        f = plt.figure(figsize=(10, 7))
+        ax = f.add_subplot()
+        cost_benefit_objs["cost_benefit"][hazard_type].plot_event_view((10, 25, 50, 100), axis=ax)
+        ax.set_title("Impact for different adaptation measures")
+
+        colors = {}
+        for measure_method in cfg["adaptation"][hazard_type]:
+            colors[measure_method] = eval(cfg["adaptation"][hazard_type][measure_method]["color_rgb"])
+            labels = list(colors.keys())
+            handles = [plt.Rectangle((0,0), 1, 1, color=colors[label]) for label in labels]
+            plt.legend(handles, labels)
+
+        savefig(
+            join(workdir, f"impact_for_different_adaptations_{hazard_type}.png"),
+            bbox_inches="tight")
+        close()
+
+        # plot waterfall view
+        f = plt.figure(figsize=(10, 7))
+        ax = f.add_subplot()
+        cost_benefit_objs["cost_benefit"][hazard_type].plot_waterfall(
+            exp_objs["hist"][hazard_type]["hazard"], 
+            cost_benefit_objs["adaptation_measures"][hazard_type]["hist"], 
+            exp_objs["future"][hazard_type]["hazard"], 
+            cost_benefit_objs["adaptation_measures"][hazard_type]["future"],
+            risk_func=risk_aai_agg,
+            axis=ax)
+        savefig(
+            join(workdir, f"risk_{hazard_type}.png"),
+            bbox_inches="tight")
+        close()
+
+        # plot cost-benefit
+        f = plt.figure(figsize=(10, 7))
+        ax = f.add_subplot()
+        ax = cost_benefit_objs["cost_benefit"][hazard_type].plot_cost_benefit()
+        savefig(
+            join(workdir, f"cost_benefit_{hazard_type}.png"),
+            bbox_inches="tight")
+        close()
+
+        # plot EFC
+        efc_present = cost_benefit_objs["cost_benefit"][hazard_type].imp_meas_present['no measure']['efc']
+        efc_future = cost_benefit_objs["cost_benefit"][hazard_type].imp_meas_future['no measure']['efc']
+        efc_combined_measures = cost_benefit_objs["cost_benefit"][hazard_type].combine_measures(
+            list(cfg["adaptation"]["TC_wind"].keys()),
+            "Combine measure",
+            new_color = array([0.1, 0.8, 0.9]),
+            disc_rates = discount_rates[hazard_type]
+        ).imp_meas_future['Combine measure']['efc']
+
+        ax = plt.subplot(1, 1, 1)
+        efc_present.plot(axis=ax, color='blue', label='Present')
+        efc_future.plot(axis=ax, color='orange', label='Future, unadapted')
+        efc_combined_measures.plot(axis=ax, color='green', label='Future, adapted')
+        ax.legend()
+
+        plt.xlim([0, 100])
+        index = efc_future.return_per.tolist().index(
+            min(efc_future.return_per, key=lambda x:abs(x - 100.0))) # return year 100
+        plt.ylim([0, efc_future.impact[index] * 1.3])
+        savefig(
+            join(workdir, f"efc_{hazard_type}.png"),
+            bbox_inches="tight")
+        close()
+
+def plot_impact_wrapper(cfg: dict, workdir: str, exp_objs: dict, add_basemap: bool = False):
     """Plot wrapper
 
     Args:

@@ -67,11 +67,15 @@ must be included. For example, we can define the following adaptation for TC (wi
 
     adaptation:
         TC_wind:
-            mdd_impact: (1, 0)
-            paa_impact: (1, -0.15)
-            hazard_inten_imp: (1, -10)
-            cost: 10000
-            color_rgb: (1, 1, 1)
+            measure1:
+                mdd_impact: (1, 0)
+                paa_impact: (1, -0.15)
+                hazard_inten_imp: (1, -10)
+                cost: 10000
+                color_rgb: (1, 1, 1)
+                discount_rate: 0.014
+            measure2:
+                ...
 
 Details about how to define a adaptation configuration can be found in `Adaptation <https://climaterisk.readthedocs.io/en/latest/Concepts.html#Adaptation>`_.
 
