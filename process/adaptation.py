@@ -94,7 +94,10 @@ def define_adaptation(adaptation_cfg: dict, imapct_obj) -> dict:
 
     adaptation = {}
 
-    for proc_hazard_name in adaptation_cfg:
+    for proc_hazard_name in imapct_obj:
+
+        if proc_hazard_name not in adaptation_cfg:
+            raise Exception(f"Hazard {proc_hazard_name} is enabled but not defined in adaptation ...")
 
         meas_set = MeasureSet()
 

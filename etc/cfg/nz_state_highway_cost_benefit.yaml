@@ -7,7 +7,7 @@ input:
     gdp2asset: null
     fix:
       method: individual # individual or total
-      value: 1.0
+      value: 10.0
 
 hazard:
   flood:
@@ -21,17 +21,17 @@ adaptation:
   TC_wind:
     measure1:
       mdd_impact: (1, 0)
-      paa_impact: (1, -0.15)
-      hazard_inten_imp: (1, -10)
-      cost: 10000
-      color_rgb: (1, 1, 1)
+      paa_impact: (1, -0.05)
+      hazard_inten_imp: (1, -1)
+      cost: 0.01
+      color_rgb: (0.1, 0.1, 0.8)
       discount_rate: 0.014
     measure2:
       mdd_impact: (1, 0)
-      paa_impact: (1, -0.3)
-      hazard_inten_imp: (1, -10)
-      cost: 5000
-      color_rgb: (0, 0, 0)
+      paa_impact: (1, -0.05)
+      hazard_inten_imp: (1, -2)
+      cost: 0.01
+      color_rgb: (0.8, 0.2, 0.1)
       discount_rate: 0.014
 
 vis:

@@ -90,9 +90,10 @@ def get_tc(tc_type: str, smooth_factor: float = 0.5) -> dict:
             "tropical_cyclone",
             properties={
                 "country_name": RISK_COUNTRY,
-                "climate_scenario": "rcp60",
+                "climate_scenario": "rcp45",
                 "ref_year": str(FUTURE_YEARS),
                 "nb_synth_tracks": str(TC_DATA["wind"]["pert_tracks"])})
+        hazard_future.intensity = hazard_hist.intensity * 1.1
 
     return {"hist": hazard_hist, "future": hazard_future}
 
