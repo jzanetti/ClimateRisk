@@ -65,10 +65,10 @@ def get_data():
         makedirs(workdir)
 
     print("Get exposures ...")
-    exp_obj = get_exposure(cfg["input"], add_future=True)
+    exp_obj = get_exposure(cfg["input"], economy_growth=cfg["economy_annual_growth"], add_future=True)
 
     print("Get hazard ...")
-    hazards = get_hazard(cfg["hazard"]) 
+    hazards = get_hazard(cfg["hazard"], future_hazard_para=cfg["future_hazard_para"], task_type="cost_benefit") 
 
     print("Obtain impact based on hazard...")
     impacts = get_impact(cfg["hazard"])
@@ -81,7 +81,8 @@ def get_data():
 
     print("Combining exposure, impact and hazard for both hist and future ...")
     for exp_flag in ["hist", "future"]:
-        exp_obj[exp_flag] = update_exposure(exp_obj, impacts, hazards, exp_flag=exp_flag)
+        exp_obj[exp_flag] = update_exposure(
+            exp_obj, impacts, hazards, exp_flag=exp_flag, task_type="cost_benefit")
 
     print("Calculating cost-benefit ...")
     cost_benefit_objs = calculate_cost_benefit(exp_obj, adaptations, discount_rates)

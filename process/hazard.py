@@ -8,8 +8,9 @@ from geopandas import read_file
 from process.climada_petals.landslide import Landslide
 from pickle import load as pickle_load
 from climada.util.api_client import Client
+from process import INVALID_KEY
 
-def get_hazard(hazard_cfg: dict) -> dict:
+def get_hazard(hazard_cfg: dict, future_hazard_para: dict or None or str = INVALID_KEY, task_type: str = "impact") -> dict:
     """Get hazard
 
     Args:
@@ -31,13 +32,12 @@ def get_hazard(hazard_cfg: dict) -> dict:
         if not proc_hazard_cfg["enable"]:
             continue
 
-        if proc_hazard_name == "TC_track":
-
-            hazards[proc_hazard_name] = get_tc(tc_type="track")
-
-        elif proc_hazard_name == "TC_wind":
-
-            hazards[proc_hazard_name] = get_tc(tc_type="wind")
+        if proc_hazard_name == "TC":
+            
+            if task_type == "impact":
+                hazards[proc_hazard_name] = get_tc(tc_type="track", future_hazard_para=future_hazard_para)
+            elif task_type == "cost_benefit":
+                hazards[proc_hazard_name] = get_tc(tc_type="wind", future_hazard_para=future_hazard_para)
 
         elif proc_hazard_name == "landslide":
 
@@ -48,12 +48,12 @@ def get_hazard(hazard_cfg: dict) -> dict:
             hazards[proc_hazard_name] = get_riverflood()
 
         else:
-            raise Exception("fHazard type {proc_hazard_name} is not supported yet")
+            raise Exception(f"Hazard type {proc_hazard_name} is not supported yet")
 
     return hazards
 
 
-def get_tc(tc_type: str, smooth_factor: float = 0.5) -> dict:
+def get_tc(tc_type: str, future_hazard_para: dict or None = None, smooth_factor: float = 0.5) -> dict:
     """Get TC from a certain provider
 
     Returns:
@@ -86,14 +86,19 @@ def get_tc(tc_type: str, smooth_factor: float = 0.5) -> dict:
                 "nb_synth_tracks": str(TC_DATA["wind"]["pert_tracks"])
             }
         )
-        hazard_future = client.get_hazard(
-            "tropical_cyclone",
-            properties={
-                "country_name": RISK_COUNTRY,
-                "climate_scenario": "rcp45",
-                "ref_year": str(FUTURE_YEARS),
-                "nb_synth_tracks": str(TC_DATA["wind"]["pert_tracks"])})
-        hazard_future.intensity = hazard_hist.intensity * 1.1
+
+        if future_hazard_para is INVALID_KEY:
+            hazard_future = None
+        else:
+            hazard_future = client.get_hazard(
+                "tropical_cyclone",
+                properties={
+                    "country_name": RISK_COUNTRY,
+                    "climate_scenario": "rcp45",
+                    "ref_year": str(FUTURE_YEARS),
+                    "nb_synth_tracks": str(TC_DATA["wind"]["pert_tracks"])})
+            if future_hazard_para is not None:
+                hazard_future.intensity = hazard_hist.intensity * (1.0 + future_hazard_para)
 
     return {"hist": hazard_hist, "future": hazard_future}
 

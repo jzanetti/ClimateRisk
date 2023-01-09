@@ -64,7 +64,7 @@ def get_data():
         makedirs(workdir)
 
     print("Get exposures ...")
-    exp_obj = get_exposure(cfg["input"])["hist"]
+    exp_obj = get_exposure(cfg["input"])
 
     print("Get hazard ...")
     hazards = get_hazard(cfg["hazard"]) 

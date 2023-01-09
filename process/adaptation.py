@@ -43,10 +43,6 @@ def calculate_cost_benefit(exp_objs: dict, adaptations: dict, discount_rates: di
 
         cost_benefit_output[hazard_name] = costben
         adaptation_measures_output[hazard_name]= adaptation_measure_objs
-    
-
-    # costben.plot_waterfall(exp_objs["hist"][hazard_name]["hazard"], adaptation_measure_objs["hist"], exp_objs["future"][hazard_name]["hazard"], adaptation_measure_objs["future"],
-    #                           risk_func=risk_aai_agg)
 
     return {
         "cost_benefit": cost_benefit_output,

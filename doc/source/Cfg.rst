@@ -79,4 +79,17 @@ must be included. For example, we can define the following adaptation for TC (wi
 
 Details about how to define a adaptation configuration can be found in `Adaptation <https://climaterisk.readthedocs.io/en/latest/Concepts.html#Adaptation>`_.
 
+For all the **cost-benefit** calculations, we also need to include future impacts and economy (for exposure) which can be configured as:
+
+.. code-block:: yaml
+
+    economy_annual_growth: 0.03
+    future_hazard_para: 0.1
+
+where ``future_hazard_para`` can be set to ``None`` or a number (float):
+
+- ``future_hazard_para = None``: a CLIMADA build-in function (e.g., using data from RCP45) will be used to produce future climate hazard.
+- ``future_hazard_para = <number>``: the future climate hazard will be ``<present hazard> * (1.0 + <number>)``. (e.g., by 2080 the impact intensity will 10% stronger).
+- ``economy_annual_growth``: Economy annual growth applied to expousre (e.g., it is 3% for the above example).
+
 

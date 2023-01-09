@@ -63,7 +63,7 @@ def plot_cost_benefit_wrapper(cfg: dict, workdir: str, exp_objs: dict, cost_bene
         efc_present = cost_benefit_objs["cost_benefit"][hazard_type].imp_meas_present['no measure']['efc']
         efc_future = cost_benefit_objs["cost_benefit"][hazard_type].imp_meas_future['no measure']['efc']
         efc_combined_measures = cost_benefit_objs["cost_benefit"][hazard_type].combine_measures(
-            list(cfg["adaptation"]["TC_wind"].keys()),
+            list(cfg["adaptation"][hazard_type].keys()),
             "Combine measure",
             new_color = array([0.1, 0.8, 0.9]),
             disc_rates = discount_rates[hazard_type]

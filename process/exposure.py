@@ -52,7 +52,7 @@ def apply_asset_to_exposure(exp_obj: GeoDataFrame, litpop_obj: GeoDataFrame) -> 
     return gdf
 
 
-def get_exposure(input_cfg: dict, add_future: bool = False) -> Exposures:
+def get_exposure(input_cfg: dict, economy_growth: float or None, add_future: bool = False) -> Exposures:
     """Get exposure object
 
     Args:
@@ -100,12 +100,12 @@ def get_exposure(input_cfg: dict, add_future: bool = False) -> Exposures:
 
     future_exp_obj = None
     if add_future:
-        future_exp_obj = add_future_exp(exp_obj) 
+        future_exp_obj = add_future_exp(exp_obj, annual_growth_rate=economy_growth) 
 
     return {"hist": exp_obj, "future": future_exp_obj}
 
 
-def add_future_exp(exp_present: Exposures, annual_growth_rate: float = 1.02) -> Exposures:
+def add_future_exp(exp_present: Exposures, annual_growth_rate: float = 0.02) -> Exposures:
     """_summary_
 
     Args:
@@ -121,7 +121,7 @@ def add_future_exp(exp_present: Exposures, annual_growth_rate: float = 1.02) -> 
 
     n_years = exp_future.ref_year - exp_present.ref_year + 1
 
-    growth = annual_growth_rate ** n_years
+    growth = (1.0 + annual_growth_rate) ** n_years
 
     exp_future.gdf["value"] = exp_future.gdf["value"] * growth
 
@@ -141,7 +141,8 @@ def update_exposure(
     exp_obj: Exposures, 
     impacts: dict, 
     hazards: dict,
-    exp_flag: str = "hist") -> dict:
+    exp_flag: str = "hist",
+    task_type: str = "impact") -> dict:
     """Combining Exposure with Impact function
 
     Args:
@@ -158,12 +159,18 @@ def update_exposure(
         
         exposure_obj = assign_impact(exp_obj[exp_flag], impacts[hazard_name])
         
-        if hazard_name == "TC_track":
-            update_hazard = TropCyclone.from_tracks(
-                hazards[hazard_name][exp_flag], 
-                centroids=gdf2centroids(exposure_obj.gdf))
-        elif hazard_name in ["landslide", "flood", "TC_wind"]:
+        if hazard_name == "TC":
+
+            if task_type == "impact":
+                update_hazard = TropCyclone.from_tracks(
+                    hazards[hazard_name][exp_flag], 
+                    centroids=gdf2centroids(exposure_obj.gdf))
+            elif task_type == "cost_benefit":
+                update_hazard = hazards[hazard_name][exp_flag]
+
+        elif hazard_name in ["landslide", "flood"]:
             update_hazard = hazards[hazard_name][exp_flag]
+
         else:
             raise Exception(f"Hazard {hazard_name} is not supported yet ...")
 
