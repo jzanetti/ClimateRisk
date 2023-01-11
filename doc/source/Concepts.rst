@@ -282,8 +282,9 @@ Here the adapation measure for ``measure1`` (there is only one measure under ``T
 the relationships between industries, the goods and services they produce, and who uses them.
 
 The table can be obtained from two sources:
-- ``The World Input-Output Database (WIOD) project``: This project provides inter national table for 43 countries and it is natively suppored by ``CLIMADA``. However New Zealand is not part of the database.
-- ``OECD Inter-Country Input-Output (ICIO) Tables`` (`Link <https://www.oecd.org/sti/ind/inter-country-input-output-tables.htm>`_): it provides the inter national table for all OECD countries (including New Zealand) and a few major non-OECD countries (e.g., all G20 countries such as China, Brazil and India).
+
+- **The World Input-Output Database (WIOD) project**: This project provides inter national table for 43 countries and it is natively suppored by ``CLIMADA``. However New Zealand is not part of the database.
+- **OECD Inter-Country Input-Output (ICIO) Tables** (`Link <https://www.oecd.org/sti/ind/inter-country-input-output-tables.htm>`_): it provides the inter national table for all OECD countries (including New Zealand) and a few major non-OECD countries (e.g., all G20 countries such as China, Brazil and India).
 
 We can calcuate both the **direct** and **indirect** impacts. For example,
 
