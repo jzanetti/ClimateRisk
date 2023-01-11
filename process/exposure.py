@@ -52,7 +52,7 @@ def apply_asset_to_exposure(exp_obj: GeoDataFrame, litpop_obj: GeoDataFrame) -> 
     return gdf
 
 
-def get_exposure(input_cfg: dict, economy_growth: float or None, add_future: bool = False) -> Exposures:
+def get_exposure(input_cfg: dict, economy_growth: float or None = None, add_future: bool = False) -> Exposures:
     """Get exposure object
 
     Args:
@@ -99,6 +99,7 @@ def get_exposure(input_cfg: dict, economy_growth: float or None, add_future: boo
         exp_obj.gdf = apply_asset_to_exposure(exp_obj.gdf, ref_obj.gdf)
 
     future_exp_obj = None
+
     if add_future:
         future_exp_obj = add_future_exp(exp_obj, annual_growth_rate=economy_growth) 
 

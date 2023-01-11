@@ -31,7 +31,7 @@ from matplotlib.collections import LineCollection
 from matplotlib.lines import Line2D
 from matplotlib.pyplot import title
 
-def plot_tc(workdir: str, tc_obj: TCTracks_type) -> Impact_type:
+def plot_tc(workdir: str, tc_obj: TCTracks_type, only_nz: bool = True) -> Impact_type:
     """Plot LitPop
 
     Args:
@@ -52,7 +52,14 @@ def plot_tc(workdir: str, tc_obj: TCTracks_type) -> Impact_type:
     SAFFIR_SIM_CAT = [34, 64, 83, 96, 113, 137, 1000]
 
     CAT_COLORS = cm_mp.rainbow(np.linspace(0, 1, len(SAFFIR_SIM_CAT)))
-    extent = (160.0, 180.0, -50.0, -30.0)
+
+    if only_nz:
+        extent = (160.0, 180.0, -50.0, -30.0)
+    else:
+        extent = tc_obj.get_extent(deg_buffer=1)
+
+    mid_lon = 0.5 * (extent[1] + extent[0])
+
     mid_lon = 0.5 * (extent[1] + extent[0])
 
     kwargs = {}
@@ -77,6 +84,7 @@ def plot_tc(workdir: str, tc_obj: TCTracks_type) -> Impact_type:
         # remove segments which cross 180 degree longitude boundary
         segments = segments[segments[:, 0, 0] * segments[:, 1, 0] >= 0, :, :]
         if track.orig_event_flag:
+            continue
             track_lc = LineCollection(segments, cmap=cmap, norm=norm,
                                         linestyle='solid', **kwargs)
         else:
