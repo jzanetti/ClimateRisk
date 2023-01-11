@@ -6,8 +6,8 @@ input:
     litpop: null
     gdp2asset: null
     fix:
-      method: individual # individual or total
-      value: 1.0
+      method: total # individual or total
+      value: 52000000000
 
 hazard:
   flood:
