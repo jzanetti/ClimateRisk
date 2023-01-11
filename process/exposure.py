@@ -211,7 +211,7 @@ def get_from_shp(shp_file: str, res: int = 1000, crs_target: int or None = 4326)
     return exp_obj
 
 
-def get_from_litpop(latlon: dict or None = None, country: str = RISK_COUNTRY) -> Exposures:
+def get_from_litpop(latlon: dict or None = None, country: str or list = RISK_COUNTRY) -> Exposures:
     """Get Litpop data
 
     Returns:
@@ -219,7 +219,15 @@ def get_from_litpop(latlon: dict or None = None, country: str = RISK_COUNTRY) ->
     """
     client = Client()
 
-    litpop_obj = client.get_litpop(country=country)
+    if isinstance(country, str):
+        litpop_obj = client.get_litpop(country=country)
+
+    elif isinstance(country, list):
+        all_exps = []
+        # for proc_country in cfg["input"]["countries"]:
+        for proc_country in country:
+            all_exps.append(get_from_litpop(country=proc_country))
+        litpop_obj = Exposures.concat(all_exps)
 
     if latlon is not None:
         gdf = litpop_obj.gdf

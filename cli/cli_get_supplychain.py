@@ -11,13 +11,15 @@ Description:
 """
 
 import argparse
-from process.supplychain import get_supplychain, calculate_direct_impact
+from process.supplychain import get_supplychain, calculate_supplychain_impact
 from process.impact import get_impact
 from process.exposure import get_from_litpop
-from climada.entity import Exposures
-from process.utils import gdf2centroids, read_cfg
+from os.path import join, exists
+from os import makedirs
+from process.utils import read_cfg
 from process.hazard import get_hazard
 from process.exposure import update_exposure
+from process import TC_DATA
 
 def get_example_usage():
     example_text = """example:
@@ -46,40 +48,38 @@ def setup_parser():
         help="the path of configuration file")
 
     return parser.parse_args(
-        [
-            "--workdir", "/tmp/climaterisk",
-            "--cfg", "etc/cfg/nz_supplychain.yaml"
-        ]
+        # [
+        #    "--workdir", "/tmp/climaterisk",
+        #    "--cfg", "etc/cfg/nz_supplychain.yaml"
+        # ]
     )
 
 
 def get_data():
     args = setup_parser()
+
     cfg = read_cfg(args.cfg)
 
+    workdir = join(args.workdir, cfg["name"])
+
+    if not exists(workdir):
+        makedirs(workdir)
+
     print("Get exposures ...")
-    all_exps = []
-    for proc_country in cfg["input"]["countries"]:
-        all_exps.append(get_from_litpop(country=proc_country))
-    exp = Exposures.concat(all_exps)
+    exp = get_from_litpop(country=cfg["input"]["countries"])
 
     print("Obtain impact based on hazard...")
     impacts = get_impact({"TC": {"enable": True}})
 
     print("Get supply chain data ...")
-    supplychain = get_supplychain(cfg["input"])
+    supplychain = get_supplychain(cfg["input"]["file"])
 
     print("Get hazard (TC) ...")
     hazards = get_hazard(
         {"TC": {"enable": True}}, 
         None, 
         task_type="supplychain",
-        tc_data_cfg={
-            "cyclone": {
-                "countries": ["New Zealand", "Japan", "Australia", "China"],
-                "year_range": "2010-2011", # # 2010-2012 or None
-                "pert_tracks": 1
-            }}
+        tc_data_cfg=TC_DATA["track2"]
     )
 
     print("Update exposure ...")
@@ -89,34 +89,15 @@ def get_data():
         hazards,
         task_type="supplychain")
 
-    print("Calculating direct impact ...")
-    calculate_direct_impact(supplychain, updated_exp["TC"]["updated_hazard"], updated_exp["TC"]["exposure"], updated_exp["TC"]["impact"])
-
-    """
-    from climada.hazard import TropCyclone
-    centr = gdf2centroids(tc_hazard.gdf)
-    tc_cyclone = TropCyclone.from_tracks(tracks=tc_hazard, centroids=centr)
-    tc_cyclone.plot_intensity(event=0)
-    import matplotlib.pyplot as plt
-    plt.savefig("test.png")
-    plt.close()
-    """
-    raise Exception("!23123")
-
-    print("Get exposures ...")
-    all_exps = []
-    for proc_country in cfg["input"]["countries"]:
-        all_exps.append(get_from_litpop(country=proc_country))
-    exps = Exposures.concat(all_exps)
-    #exps.plot_hexbin(pop_name=False)
-
-    #import matplotlib.pyplot as plt
-    #plt.savefig("test.png")
-    #plt.close()
-
-
-
-    # supply_chain_data = get_supplychain(cfg["input"])
+    print("Calculating direct and indirect impact ...")
+    calculate_supplychain_impact(
+        workdir,
+        supplychain, 
+        updated_exp["TC"]["updated_hazard"], 
+        updated_exp["TC"]["exposure"], 
+        updated_exp["TC"]["impact"],
+        fields = cfg["fields"]
+        )
 
 
 

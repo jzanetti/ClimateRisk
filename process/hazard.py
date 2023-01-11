@@ -87,15 +87,9 @@ def get_tc(tc_type: str, future_hazard_para: dict or None = None, smooth_factor:
                 properties={
                     "country_name": country,
                     "climate_scenario": "historical",
-                    "nb_synth_tracks": "10"}) for country in tc_data_cfg["cyclone"]["countries"]])
+                    "nb_synth_tracks": "10"}) for country in tc_data_cfg["countries"]])
 
         hazard_future = None
-
-        # hazard_hist.plot_intensity(event=0)
-        # import matplotlib.pyplot as plt
-        # plt.savefig("test.png")
-        # plt.close()
-        # raise Exception("!2321")
 
     elif tc_type == "wind":
 

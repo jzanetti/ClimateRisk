@@ -1,7 +1,11 @@
 from pickle import load as pickle_load
-from climada_petals.engine import SupplyChain
+from pandas import DataFrame
+from numpy import vstack
+from process import RISK_COUNTRY
+from os.path import join
 
-def get_supplychain(cfg_input: dict):
+
+def get_supplychain(supply_chain_inputdata: str):
     """Get Supply chain data
 
     Args:
@@ -10,29 +14,60 @@ def get_supplychain(cfg_input: dict):
     Returns:
         _type_: _description_
     """
-    return pickle_load(open(cfg_input["file"], "rb"))
+    return pickle_load(open(supply_chain_inputdata, "rb"))
 
 
-def calculate_direct_impact(supplychain, hazard, exp, impact_func):
+def calculate_supplychain_impact(workdir: str, supplychain, hazard, exp, impact_func, fields: list) -> dict:
+    """_summary_
 
-    # selected_subsec_list = ["service", "manufacturing", "agriculture", "mining"]
-    selected_subsec_list = "manufacturing"
-    supplychain.calc_sector_direct_impact(hazard, exp, impact_func, selected_subsec=selected_subsec_list)
-    from pandas import DataFrame
-    from numpy import vstack
-    from tabulate import tabulate
-    df_imp = DataFrame(data=vstack(
-        [   
-            supplychain.direct_aai_agg[supplychain.reg_pos['AUS']],
-            supplychain.direct_aai_agg[supplychain.reg_pos['CHN']]
-        ]),
-        columns=supplychain.sectors,
-        index=['AUS', 'CHN'])
+    Args:
+        supplychain (_type_): _description_
+        hazard (_type_): _description_
+        exp (_type_): _description_
+        impact_func (_type_): _description_
 
-    # x = tabulate(df_imp, headers='keys', tablefmt='psql')
-    df_imp.to_csv("test.csv", index=False)
+    Raises:
+        Exception: _description_
+    """
+    
+    # country_to_be_assessed = RISK_COUNTRY
+    country_to_be_assessed = "AUS"
 
-    raise Exception("!23")
+    direct_impact = {}
+    indirect_impact = {}
+
+    for proc_field in fields:
+
+        supplychain.calc_sector_direct_impact(hazard, exp, impact_func, selected_subsec=proc_field)
+        supplychain.calc_indirect_impact(io_approach='ghosh')
+
+        df_direct_impact = DataFrame(data=vstack(
+            [   
+                supplychain.direct_aai_agg[supplychain.reg_pos[country_to_be_assessed]]
+            ]),
+            columns=supplychain.sectors,
+            index=[country_to_be_assessed])
+
+        df_indirect_impact = DataFrame(data=vstack(
+            [   
+                supplychain.indirect_aai_agg[supplychain.reg_pos[country_to_be_assessed]]
+            ]),
+            columns=supplychain.sectors,
+            index=[country_to_be_assessed])
+
+        df_direct_impact.to_csv(join(workdir, f"direct_impact_{proc_field}.csv"), index=False)
+
+        df_indirect_impact.to_csv(join(workdir, f"indirect_impact_{proc_field}.csv"), index=False)
+
+        direct_impact[proc_field] = df_direct_impact
+        indirect_impact[proc_field] = df_indirect_impact
+
+    x = 3
+    
+    return {
+        "direct": direct_impact,
+        "indirect": indirect_impact
+    }
 
 
 

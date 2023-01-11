@@ -2,6 +2,10 @@ RISK_COUNTRY = "New Zealand"
 FUTURE_YEARS = 2080
 
 
+# ------------------
+# track and wind data are used for "get_benefit" and "get_impact"
+# track2 is used for "get_supplychain"
+# ------------------
 TC_DATA = {
     "track": {
         "provider": "wellington",
@@ -10,6 +14,11 @@ TC_DATA = {
     },
     "wind": {
         "pert_tracks": 10
+    },
+    "track2": {
+        "countries": ["New Zealand", "Japan", "Australia", "China"],
+        "year_range": "2010-2011", # # 2010-2012 or None
+        "pert_tracks": 1
     }
 }
 

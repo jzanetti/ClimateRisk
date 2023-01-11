@@ -276,5 +276,31 @@ Here the adapation measure for ``measure1`` (there is only one measure under ``T
 - The color (``color_rgb``) used to represent this measure is (1, 1, 1).
 - The discount rate (``discount_rate``) is 0.014.
 
+6. Supply chain analysis
+=========
+**Supply chain analysis** is carried out based on the ``inter-national input-output table``, which shows
+the relationships between industries, the goods and services they produce, and who uses them.
+
+The table can be obtained from two sources:
+- ``The World Input-Output Database (WIOD) project``: This project provides inter national table for 43 countries and it is natively suppored by ``CLIMADA``. However New Zealand is not part of the database.
+- ``OECD Inter-Country Input-Output (ICIO) Tables`` (`Link <https://www.oecd.org/sti/ind/inter-country-input-output-tables.htm>`_): it provides the inter national table for all OECD countries (including New Zealand) and a few major non-OECD countries (e.g., all G20 countries such as China, Brazil and India).
+
+We can calcuate both the **direct** and **indirect** impacts. For example,
+
+- **Direct impact**: we can calculate how the TC affecting Japan and Taiwan (note that for WIOD, NZ is not included) is directly affecting China.
+- **Indirect impact**: we can calculate how the TC affecting Australia and New Zealand (note that for WIOD, NZ is not included) is indirectly affecting UK (apprently the UK is not part of the AU/NZ TC trajectories, but it still could affect UK from the pespective of supply-chain.)
+
+.. note::
+
+    The direct impact from a hazard (e.g., TC) is calculated on the countries where are listed in the Input-Output Database. It depends on:
+
+    - The scale of source hazard:
+        - (1) the defined exporesure countries, 
+        - (2) the hazard itself and 
+        - (3) the impact calculated from (1) and (2)
+
+    - The supply chain inter-nation table (e.g., million dollars)
+
+
 
 

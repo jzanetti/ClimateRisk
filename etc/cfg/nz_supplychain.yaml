@@ -8,6 +8,12 @@ input:
     - Australia
     - China
 
+fields:
+  - service
+  - manufacturing
+  - agriculture
+  - mining
+
 
 
 
