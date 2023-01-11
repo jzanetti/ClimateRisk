@@ -1,0 +1,18 @@
+name: nz_supply_chain
+
+input:
+  file: etc/data/supply_chain/supply_chain.pickle
+  countries:
+    - New Zealand
+    - Japan
+    - Australia
+    - China
+
+
+
+
+
+
+
+
+    

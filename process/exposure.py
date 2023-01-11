@@ -165,6 +165,8 @@ def update_exposure(
                 update_hazard = TropCyclone.from_tracks(
                     hazards[hazard_name][exp_flag], 
                     centroids=gdf2centroids(exposure_obj.gdf))
+            elif task_type == "supplychain":
+                update_hazard = hazards[hazard_name][exp_flag]
             elif task_type == "cost_benefit":
                 update_hazard = hazards[hazard_name][exp_flag]
 
@@ -209,14 +211,15 @@ def get_from_shp(shp_file: str, res: int = 1000, crs_target: int or None = 4326)
     return exp_obj
 
 
-def get_from_litpop(latlon: dict or None = None) -> Exposures:
+def get_from_litpop(latlon: dict or None = None, country: str = RISK_COUNTRY) -> Exposures:
     """Get Litpop data
 
     Returns:
         Exposures: Exposures based on LitPop
     """
     client = Client()
-    litpop_obj = client.get_litpop(country=RISK_COUNTRY)
+
+    litpop_obj = client.get_litpop(country=country)
 
     if latlon is not None:
         gdf = litpop_obj.gdf

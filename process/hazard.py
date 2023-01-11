@@ -9,8 +9,9 @@ from process.climada_petals.landslide import Landslide
 from pickle import load as pickle_load
 from climada.util.api_client import Client
 from process import INVALID_KEY
+from climada.hazard import Hazard
 
-def get_hazard(hazard_cfg: dict, future_hazard_para: dict or None or str = INVALID_KEY, task_type: str = "impact") -> dict:
+def get_hazard(hazard_cfg: dict, future_hazard_para: dict or None or str = INVALID_KEY, task_type: str = "impact", tc_data_cfg: dict = TC_DATA) -> dict:
     """Get hazard
 
     Args:
@@ -35,9 +36,11 @@ def get_hazard(hazard_cfg: dict, future_hazard_para: dict or None or str = INVAL
         if proc_hazard_name == "TC":
             
             if task_type == "impact":
-                hazards[proc_hazard_name] = get_tc(tc_type="track", future_hazard_para=future_hazard_para)
+                hazards[proc_hazard_name] = get_tc(tc_type="track", future_hazard_para=future_hazard_para, tc_data_cfg=tc_data_cfg)
             elif task_type == "cost_benefit":
-                hazards[proc_hazard_name] = get_tc(tc_type="wind", future_hazard_para=future_hazard_para)
+                hazards[proc_hazard_name] = get_tc(tc_type="wind", future_hazard_para=future_hazard_para, tc_data_cfg=tc_data_cfg)
+            elif task_type == "supplychain":
+                hazards[proc_hazard_name] = get_tc(tc_type="track2", future_hazard_para=future_hazard_para, tc_data_cfg=tc_data_cfg)
 
         elif proc_hazard_name == "landslide":
 
@@ -53,7 +56,7 @@ def get_hazard(hazard_cfg: dict, future_hazard_para: dict or None or str = INVAL
     return hazards
 
 
-def get_tc(tc_type: str, future_hazard_para: dict or None = None, smooth_factor: float = 0.5) -> dict:
+def get_tc(tc_type: str, future_hazard_para: dict or None = None, smooth_factor: float = 0.5, tc_data_cfg: dict = TC_DATA) -> dict:
     """Get TC from a certain provider
 
     Returns:
@@ -63,16 +66,36 @@ def get_tc(tc_type: str, future_hazard_para: dict or None = None, smooth_factor:
     if tc_type == "track":
 
         hazard_hist = TCTracks.from_ibtracs_netcdf(
-            provider=TC_DATA["track"]["provider"], 
-            year_range=str2list_for_year(TC_DATA["track"]["year_range"]), 
+            provider=tc_data_cfg["track"]["provider"], 
+            year_range=str2list_for_year(tc_data_cfg["track"]["year_range"]), 
             estimate_missing=True)
 
         hazard_hist.equal_timestep(smooth_factor)
 
         hazard_hist.calc_perturbed_trajectories(
-            nb_synth_tracks=TC_DATA["track"]["pert_tracks"])
+            nb_synth_tracks=tc_data_cfg["track"]["pert_tracks"])
 
         hazard_future = None
+
+    elif tc_type == "track2":
+
+        client = Client()
+
+        hazard_hist = Hazard.concat(
+            [client.get_hazard(
+                "tropical_cyclone",
+                properties={
+                    "country_name": country,
+                    "climate_scenario": "historical",
+                    "nb_synth_tracks": "10"}) for country in tc_data_cfg["cyclone"]["countries"]])
+
+        hazard_future = None
+
+        # hazard_hist.plot_intensity(event=0)
+        # import matplotlib.pyplot as plt
+        # plt.savefig("test.png")
+        # plt.close()
+        # raise Exception("!2321")
 
     elif tc_type == "wind":
 
@@ -83,7 +106,7 @@ def get_tc(tc_type: str, future_hazard_para: dict or None = None, smooth_factor:
             properties={
                 "country_name": RISK_COUNTRY,
                 "climate_scenario": "historical",
-                "nb_synth_tracks": str(TC_DATA["wind"]["pert_tracks"])
+                "nb_synth_tracks": str(tc_data_cfg["wind"]["pert_tracks"])
             }
         )
 
