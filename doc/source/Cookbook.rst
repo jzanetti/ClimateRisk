@@ -1,6 +1,12 @@
 Cookbook
 #######
 
+In this section, we provide a few examples about how to calculate the climate risk impacts for the New Zealand highway system.
+
+.. note::
+
+   The numbers used in this example are not real, and they are only used for demonstration purpose.
+
 
 1. Calculating climate risk impact
 ==========
@@ -94,10 +100,20 @@ Then the impact can be produced as:
 
 where ``--workdir`` indicates the working directory and the configuration file is defined from ``nz_supplychain.yaml``.
 
-Some examples for the impact on supply chain from historical TC (from Southwest pacific) for Australia can be summarized as below:
+In the configuration, the trading partners including New Zealand, Japan and China are considered. Some examples for the impact on supply chain from historical TC (from Southwest pacific) for Australia can be summarized as below:
 
-- Direct impact from the TC:
+- Direct impact from the selected TC:
 
-    - Mining :download:`pdf <img/direct_impact_mining.csv>`
+    - Agriculture :download:`link <img/direct_impact_agriculture.csv>`
+    - Manufacturing :download:`link <img/direct_impact_manufacturing.csv>`
+    - Mining :download:`link <img/direct_impact_mining.csv>`
+    - Service :download:`link <img/direct_impact_service.csv>`
+
+- Indirect impact from the selected TC:
+
+    - Agriculture :download:`link <img/indirect_impact_agriculture.csv>`
+    - Manufacturing :download:`link <img/indirect_impact_manufacturing.csv>`
+    - Mining :download:`link <img/indirect_impact_mining.csv>`
+    - Service :download:`link <img/indirect_impact_service.csv>`
 
 
