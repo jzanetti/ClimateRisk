@@ -1,0 +1,34 @@
+name: nz_railway
+
+input:
+  file: etc/data/lds-nz-railway-centre-lines-SHP/nz-railway-centre-lines.shp
+  value_adjustment_option: 
+    litpop: true
+    gdp2asset: null
+    fix: null
+
+hazard:
+  flood:
+    enable: False
+  landslide:
+    enable: False
+  TC:
+    enable: True
+
+vis:
+  basemap: etc/data/nz_coastlines/nz-coastlines-and-islands-polygons-topo-150k.shp
+  exposure:
+    enable: True
+  hazard:
+    enable: False
+  impact:
+    enable: True
+
+
+
+
+
+
+
+
+    

@@ -48,7 +48,7 @@ def setup_parser():
     return parser.parse_args(
         [
             "--workdir", "/tmp/climaterisk",
-            "--cfg", "etc/cfg/nz_road_impact.yaml"
+            "--cfg", "etc/cfg/nz_railway_impact.yaml"
         ]
     )
 
