@@ -48,10 +48,10 @@ def setup_parser():
         help="the path of configuration file")
 
     return parser.parse_args(
-        # [
-        #    "--workdir", "/tmp/climaterisk",
-        #    "--cfg", "etc/cfg/nz_supplychain.yaml"
-        # ]
+        [
+            "--workdir", "/tmp/climaterisk",
+            "--cfg", "etc/cfg/nz_supplychain.yaml"
+        ]
     )
 
 

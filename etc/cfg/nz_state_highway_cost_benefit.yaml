@@ -6,8 +6,8 @@ input:
     litpop: null
     gdp2asset: null
     fix:
-      method: individual # individual or total
-      value: 100.0
+      method: total # individual or total
+      value: 52000000000.0
 
 economy_annual_growth: 0.015
 
@@ -19,22 +19,22 @@ hazard:
   TC:
     enable: True
 
-future_hazard_para: 0.15
+future_hazard_para: 0.5
 
 adaptation:
   TC:
     measure1:
       mdd_impact: (1, 0)
       paa_impact: (1, -0.05)
-      hazard_inten_imp: (1, -1)
-      cost: 10
+      hazard_inten_imp: (1, -10)
+      cost: 1000000.0
       color_rgb: (0.1, 0.1, 0.8)
       discount_rate: 0.014
     measure2:
-      mdd_impact: (1, 0)
-      paa_impact: (1, -0.05)
-      hazard_inten_imp: (1, -2)
-      cost: 10
+      mdd_impact: (1, -0.1)
+      paa_impact: (1, 0)
+      hazard_inten_imp: (1, -5)
+      cost: 1000000.0
       color_rgb: (0.8, 0.2, 0.1)
       discount_rate: 0.014
 
