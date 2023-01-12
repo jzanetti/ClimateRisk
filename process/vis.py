@@ -156,6 +156,8 @@ def plot_exposure(workdir: str, exposure_obj: Exposures, basemap: GeoDataFrame o
     ax.set_xlabel("Longitude")
     ax.set_ylabel("Latitude")
     ax.set_title("Exposure")
+    #ax.set_xlim(174.7, 174.9)
+    #ax.set_ylim(-41.35, -41.25)
 
     savefig(
         join(workdir, "exposure.png"),
@@ -188,13 +190,16 @@ def plot_impact(
 
     vrange = get_exposure_range(impact_obj._build_exp().gdf)
 
-    plot_scattered_data(
+    ax = plot_scattered_data(
         impact_obj, 
         f"Expected annual impact from {hazard_name}", 
         axes=ax,
         vmin=vrange["min"],
         vmax=vrange["max"],
-        ignore_zero=True)
+        ignore_zero=False)
+
+    # ax.set_xlim(174.7, 174.9)
+    # ax.set_ylim(-41.35, -41.25)
 
     savefig(
         join(workdir, f"impact_{hazard_name}.png"),

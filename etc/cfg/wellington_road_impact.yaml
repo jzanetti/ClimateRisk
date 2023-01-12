@@ -1,0 +1,34 @@
+name: nz_road
+
+input:
+  file: etc/data/lds-wellington-road-centrelines-topo-150k-SHP/nz-road-centrelines-topo-150k.shp
+  value_adjustment_option: 
+    litpop: true
+    gdp2asset: null
+    fix: null
+
+hazard:
+  flood:
+    enable: False
+  landslide:
+    enable: False
+  TC:
+    enable: True
+
+vis:
+  basemap: etc/data/nz_coastlines/nz-coastlines-and-islands-polygons-topo-150k.shp
+  exposure:
+    enable: False
+  hazard:
+    enable: False
+  impact:
+    enable: True
+
+
+
+
+
+
+
+
+    
