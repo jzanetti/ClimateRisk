@@ -93,3 +93,11 @@ Then the impact can be produced as:
     get_supplychain --workdir /tmp/climaterisk_data --cfg etc/cfg/nz_supplychain.yaml
 
 where ``--workdir`` indicates the working directory and the configuration file is defined from ``nz_supplychain.yaml``.
+
+Some examples for the impact on supply chain from historical TC (from Southwest pacific) for Australia can be summarized as below:
+
+- Direct impact from the TC:
+
+    - Mining :download:`pdf <img/direct_impact_mining.csv>`
+
+
