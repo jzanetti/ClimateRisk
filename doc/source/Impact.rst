@@ -34,6 +34,7 @@ The configuration file must be defined before any impact assessment tasks. A bas
 
     vis:
         basemap: etc/data/nz_coastlines/nz-coastlines-and-islands-polygons-topo-150k.shp
+        extent: null
         exposure:
             enable: False
         hazard:

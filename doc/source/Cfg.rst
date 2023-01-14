@@ -30,6 +30,7 @@ The configuration file must be defined before any impact assessment tasks. A bas
 
     vis:
         basemap: etc/data/nz_coastlines/nz-coastlines-and-islands-polygons-topo-150k.shp
+        extent: (174.65, 174.9, -41.37, -41.27)
         exposure:
             enable: False
         hazard:
@@ -38,7 +39,7 @@ The configuration file must be defined before any impact assessment tasks. A bas
             enable: True
 
 
-In the above file, there are mainly **5** sections:
+In the above file, there are mainly **4** sections:
 
 - ``name``: The experiment name will be included in the filename of any outputs.
 - ``input``: This section controls the infrastructure to be assessed.
@@ -48,9 +49,8 @@ In the above file, there are mainly **5** sections:
     Note that for ``fix``, when the method is ``total``, the defined value is the total value for all the infrastructure. 
     If the method is ``individual``, the value is used for each segment for the infrastructure.
     Details can be obtained at `Exposure: value <https://climaterisk.readthedocs.io/en/latest/Concepts.html#exposure-value>`_.
-- ``hazard``: This defines the types of hazards to be used for the climate risk assessment. Currently ``landslide``, ``TC (Tropical Cyclone)`` and ``flood`` are supported. Details can be obtained at `Hazard <https://climaterisk.readthedocs.io/en/latest/Concepts.html#hazard>`_.
-
-An impact function will be assigned automatically depending on the required ``hazard(s)`` in the configuration file.
+- ``hazard``: This defines the types of hazards to be used for the climate risk assessment. Currently ``landslide``, ``TC (Tropical Cyclone)`` and ``flood`` are supported. Details can be obtained at `Hazard <https://climaterisk.readthedocs.io/en/latest/Concepts.html#hazard>`_. An impact function will be assigned automatically depending on the required ``hazard(s)`` in the configuration file.
+- ``vis``:  This defines how the visualization will be produced. ``basemap`` defines the map to be used (it can be set to ``null``). ``extent`` is set as ``(lon_min, lon_max, lat_min, lat_max)`` (if it is set to ``null``, the default extent from hazard/exposure will be used.)
 
 .. note::
 

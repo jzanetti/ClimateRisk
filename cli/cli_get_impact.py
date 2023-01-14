@@ -17,7 +17,7 @@ from process.impact import get_impact, calculate_impact_func
 from os.path import exists, join
 from os import makedirs
 from process.utils import read_cfg
-from process.vis import plot_impact_wrapper
+from process.vis import plot_wrapper
 
 def get_example_usage():
     example_text = """example:
@@ -48,7 +48,7 @@ def setup_parser():
     return parser.parse_args(
         [
             "--workdir", "/tmp/climaterisk",
-            "--cfg", "etc/cfg/nz_railway_impact.yaml"
+            "--cfg", "etc/cfg/nz_state_highway_impact.yaml"
         ]
     )
 
@@ -79,7 +79,7 @@ def get_data():
     exp_objs = calculate_impact_func(exp_objs)
 
     print("Visualization ...")
-    plot_impact_wrapper(cfg, workdir, exp_objs, add_basemap=True)
+    plot_wrapper(cfg, workdir, exp_objs)
 
 
 if __name__ == "__main__":
