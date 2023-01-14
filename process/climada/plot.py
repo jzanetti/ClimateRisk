@@ -13,12 +13,11 @@ from textwrap import wrap
 from numpy import max as numpy_max
 from numpy import mean as numpy_mean
 
-from matplotlib.pyplot import savefig, close, colorbar
+from matplotlib.pyplot import savefig, close
 from os.path import join
 from climada.hazard.tc_tracks import TCTracks as TCTracks_type
 from climada.engine.impact import Impact as Impact_type
 import matplotlib.pyplot as plt
-from process.utils import read_basemap, get_exposure_range
 from climada.entity.exposures.base import Exposures
 from geopandas import GeoDataFrame
 import cartopy.crs as ccrs
@@ -30,6 +29,8 @@ import climada.util.coordinates as u_coord
 from matplotlib.collections import LineCollection
 from matplotlib.lines import Line2D
 from matplotlib.pyplot import title
+from scipy.interpolate import griddata
+
 
 def plot_tc(workdir: str, tc_obj: TCTracks_type, only_nz: bool = True) -> Impact_type:
     """Plot LitPop
@@ -187,12 +188,18 @@ def plot_scattered_data(impact_obj, title, cmap: str = "jet",
             raise ValueError("Size mismatch in input array: %s != %s." %
                              (coord.shape[0], array_im.size))
 
-        # Binned image with coastlines
-        if isinstance(proj, ccrs.PlateCarree):
-            xmin, ymin, xmax, ymax = u_coord.latlon_bounds(coord[:, 0], coord[:, 1], buffer=buffer)
-            extent = (xmin, xmax, ymin, ymax)
-        else:
-            extent = _get_borders(coord, buffer=buffer, proj_limits=proj.x_limits + proj.y_limits)
+        if "extent" in kwargs:
+            extent = kwargs["extent"]
+            del kwargs["extent"]
+        
+        if extent is None:
+            # Binned image with coastlines
+            if isinstance(proj, ccrs.PlateCarree):
+                xmin, ymin, xmax, ymax = u_coord.latlon_bounds(coord[:, 0], coord[:, 1], buffer=buffer)
+                extent = (xmin, xmax, ymin, ymax)
+            else:
+                extent = _get_borders(coord, buffer=buffer, proj_limits=proj.x_limits + proj.y_limits)
+
         axis.set_extent((extent), proj)
 
         if shapes:
@@ -256,6 +263,145 @@ def plot_landslide(workdir: str, landslide_obj: Exposures, basemap: GeoDataFrame
 
     savefig(
         join(workdir, "landslide.png"),
+        bbox_inches='tight',
+        dpi=200)
+    close()
+
+
+
+def plot_flood(workdir, flood_obj, event_id, extent=None, smooth=True, axis=None, adapt_fontsize=True, xy_res=250, **kwargs):
+
+    def _geo_im_from_array(
+        array_sub, coord, var_name, title,
+        proj=None, smooth=True, axes=None, extent=None, figsize=(9, 13), adapt_fontsize=True,
+        **kwargs):
+
+        # Generate array of values used in each subplot
+        num_im, list_arr = _get_collection_arrays(array_sub)
+        list_tit = to_list(num_im, title, 'title')
+        list_name = to_list(num_im, var_name, 'var_name')
+        list_coord = to_list(num_im, coord, 'geo_coord')
+
+
+        is_reg, height, width = u_coord.grid_is_regular(coord)
+        if extent is None:
+            extent = _get_borders(coord, proj_limits=(-360, 360, -90, 90))
+
+        mid_lon = 0
+        if not proj:
+            mid_lon = 0.5 * sum(extent[:2])
+            proj = ccrs.PlateCarree(central_longitude=mid_lon)
+        if 'vmin' not in kwargs:
+            kwargs['vmin'] = np.nanmin(array_sub)
+        if 'vmax' not in kwargs:
+            kwargs['vmax'] = np.nanmax(array_sub)
+        if axes is None:
+            if isinstance(proj, ccrs.PlateCarree):
+                # use different projections for plot and data to shift the central lon in the plot
+                xmin, xmax = u_coord.lon_bounds(np.concatenate([c[:, 1] for c in list_coord]))
+                proj_plot = ccrs.PlateCarree(central_longitude=0.5 * (xmin + xmax))
+            _, axes, fontsize = make_map(num_im, proj=proj_plot, figsize=figsize,
+                                        adapt_fontsize=adapt_fontsize)
+        else:
+            fontsize = None
+        axes_iter = axes
+        if not isinstance(axes, np.ndarray):
+            axes_iter = np.array([[axes]])
+
+        if 'cmap' not in kwargs:
+            kwargs['cmap'] = "jet"
+
+        # Generate each subplot
+        for array_im, axis, tit, name in zip(list_arr, axes_iter.flatten(), list_tit, list_name):
+            if coord.shape[0] != array_im.size:
+                raise ValueError("Size mismatch in input array: %s != %s." %
+                                (coord.shape[0], array_im.size))
+            if smooth or not is_reg:
+                # Create regular grid where to interpolate the array
+                grid_x, grid_y = np.mgrid[
+                    extent[0]: extent[1]: complex(0, xy_res),
+                    extent[2]: extent[3]: complex(0, xy_res)]
+                grid_im = griddata((coord[:, 1], coord[:, 0]), array_im,
+                                (grid_x, grid_y))
+            else:
+                grid_x = coord[:, 1].reshape((width, height)).transpose()
+                grid_y = coord[:, 0].reshape((width, height)).transpose()
+                grid_im = np.array(array_im.reshape((width, height)).transpose())
+                if grid_y[0, 0] > grid_y[0, -1]:
+                    grid_y = np.flip(grid_y)
+                    grid_im = np.flip(grid_im, 1)
+                grid_im = np.resize(grid_im, (height, width, 1))
+            axis.set_extent((extent[0] - mid_lon, extent[1] - mid_lon,
+                            extent[2], extent[3]), crs=proj)
+
+            # Add coastline to axis
+            add_shapes(axis)
+            # Create colormesh, colorbar and labels in axis
+            cbax = make_axes_locatable(axis).append_axes('right', size="6.5%",
+                                                        pad=0.1, axes_class=plt.Axes)
+            img = axis.pcolormesh(grid_x - mid_lon, grid_y, np.squeeze(grid_im),
+                                transform=proj, **kwargs)
+            cbar = plt.colorbar(img, cax=cbax, orientation='vertical')
+            cbar.set_label(name)
+            axis.set_title("\n".join(wrap(tit)))
+            if fontsize:
+                cbar.ax.tick_params(labelsize=fontsize)
+                cbar.ax.yaxis.get_offset_text().set_fontsize(fontsize)
+                for item in [axis.title, cbar.ax.xaxis.label, cbar.ax.yaxis.label]:
+                    item.set_fontsize(fontsize)
+
+        plt.tight_layout()
+
+    def _event_plot(event_id, mat_var, col_name, smooth, crs_espg, axis=None,
+                    figsize=(9, 13), extent=None, adapt_fontsize=True, **kwargs):
+
+        if not isinstance(event_id, np.ndarray):
+            event_id = np.array([event_id])
+        array_val = list()
+        l_title = list()
+        for ev_id in event_id:
+            if ev_id > 0:
+                try:
+                    event_pos = np.where(flood_obj.event_id == ev_id)[0][0]
+                except IndexError as err:
+                    raise ValueError(f'Wrong event id: {ev_id}.') from err
+                im_val = mat_var[event_pos, :].toarray().transpose()
+                title = 'Event ID %s: %s' % (str(flood_obj.event_id[event_pos]),
+                                             flood_obj.event_name[event_pos])
+            elif ev_id < 0:
+                max_inten = np.asarray(np.sum(mat_var, axis=1)).reshape(-1)
+                event_pos = np.argpartition(max_inten, ev_id)[ev_id:]
+                event_pos = event_pos[np.argsort(max_inten[event_pos])][0]
+                im_val = mat_var[event_pos, :].toarray().transpose()
+                title = '%s-largest Event. ID %s: %s' % (np.abs(ev_id),
+                                                         str(flood_obj.event_id[event_pos]),
+                                                         flood_obj.event_name[event_pos])
+            else:
+                im_val = np.max(mat_var, axis=0).toarray().transpose()
+                title = '%s max intensity at each point' % flood_obj.tag.haz_type
+
+            array_val.append(im_val)
+            l_title.append(title)
+
+        _geo_im_from_array(
+            array_val, flood_obj.centroids.coord, col_name,
+            l_title, smooth=smooth, axes=axis, figsize=figsize,
+            proj=crs_espg, adapt_fontsize=adapt_fontsize, extent=extent, **kwargs)
+
+        return
+
+
+    if isinstance(extent, str):
+        extent = eval(extent)
+
+    flood_obj._set_coords_centroids()
+    col_label = 'Intensity (%s)' % flood_obj.units
+    crs_epsg, _ = u_plot.get_transformation(flood_obj.centroids.geometry.crs)
+
+    _event_plot(event_id, flood_obj.intensity, col_label, smooth, crs_epsg, axis, adapt_fontsize=adapt_fontsize, extent=extent, **kwargs)
+
+    savefig(
+        join(workdir, "flood.png"),
         bbox_inches='tight',
         dpi=200)
     close()

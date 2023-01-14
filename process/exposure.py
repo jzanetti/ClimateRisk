@@ -17,7 +17,7 @@ from climada.hazard import TropCyclone
 from process.utils import gdf2centroids
 
 from pickle import load as pickle_load
-from process import GDP2ASSET_DATA
+from process import GDP2ASSET_DATA, EXPOSURE_POINT_RES
 from copy import deepcopy
 
 def apply_asset_to_exposure(exp_obj: GeoDataFrame, litpop_obj: GeoDataFrame) -> GeoDataFrame:
@@ -40,7 +40,7 @@ def apply_asset_to_exposure(exp_obj: GeoDataFrame, litpop_obj: GeoDataFrame) -> 
     dist, idx = litpop_btree.query(exp_n, k=1)
     lippop_nearest = litpop_obj.iloc[idx].drop(columns="geometry").reset_index(drop=True)
 
-    exp_obj = exp_obj.drop(columns=["value", "latitude", "geometry_orig", "longitude"])
+    exp_obj = exp_obj.drop(columns=["value", "latitude", "longitude"])
     gdf = concat(
             [
                 exp_obj.reset_index(drop=True),
@@ -98,6 +98,7 @@ def get_exposure(input_cfg: dict, economy_growth: float or None = None, add_futu
 
         exp_obj.gdf = apply_asset_to_exposure(exp_obj.gdf, ref_obj.gdf)
 
+    exp_obj.gdf.plot()
     future_exp_obj = None
 
     if add_future:
@@ -187,7 +188,7 @@ def update_exposure(
     return outputs
 
 
-def get_from_shp(shp_file: str, res: int = 1000, crs_target: int or None = 4326) -> Exposures:
+def get_from_shp(shp_file: str, res: int = EXPOSURE_POINT_RES, crs_target: int or None = 4326) -> Exposures:
     """Get shapefile object
 
     Args:
@@ -208,6 +209,18 @@ def get_from_shp(shp_file: str, res: int = 1000, crs_target: int or None = 4326)
     exp_obj = u_lp.exp_geom_to_pnt(
          exp_obj, res=res, to_meters=True, disagg_met=u_lp.DisaggMethod.FIX, disagg_val=None
     )
+
+    """
+    from shapely.geometry import LineString
+    import geopandas as gpd
+    ls = LineString( exp_obj.gdf[['longitude','latitude']].to_numpy() )
+    line_gdf = gpd.GeoDataFrame( [['101']],crs='epsg:4326', geometry=[ls] )
+    geometry = [Point(xy) for xy in zip(df.X, df.Y)]
+    exp_obj_gdf = exp_obj.gdf
+    exp_obj_gdf_geometry = exp_obj_gdf.geometry
+    geo_df = gpd.GeoDataFrame(exp_obj_gdf, geometry=geometry)
+    xx2 = exp_obj.gdf.groupby(["geometry_orig"])['geometry'].apply(lambda x: LineString(x.tolist()))
+    """
 
     return exp_obj
 

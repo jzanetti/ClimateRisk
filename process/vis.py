@@ -6,14 +6,23 @@ from climada.engine.impact import Impact as Impact_type
 from geopandas import GeoDataFrame
 import matplotlib.pyplot as plt
 from process.utils import read_basemap, get_exposure_range
-from process.climada.plot import plot_tc, plot_scattered_data, plot_landslide
+from process.climada.plot import plot_tc, plot_scattered_data, plot_landslide, plot_flood
 from climada.engine.cost_benefit import risk_aai_agg
 from numpy import array
 
 def plot_cost_benefit_wrapper(cfg: dict, workdir: str, exp_objs: dict, cost_benefit_objs: dict, discount_rates: dict):
+    """Plot cost-benefit data
 
-    # costben.plot_waterfall(exp_objs["hist"][hazard_name]["hazard"], adaptation_measure_objs["hist"], exp_objs["future"][hazard_name]["hazard"], adaptation_measure_objs["future"],
-    #                           risk_func=risk_aai_agg)
+    Args:
+        cfg (dict): _description_
+        workdir (str): _description_
+        exp_objs (dict): _description_
+        cost_benefit_objs (dict): _description_
+        discount_rates (dict): _description_
+
+    Returns:
+        _type_: _description_
+    """
 
     for hazard_type in cost_benefit_objs["cost_benefit"]:
 
@@ -84,7 +93,8 @@ def plot_cost_benefit_wrapper(cfg: dict, workdir: str, exp_objs: dict, cost_bene
             bbox_inches="tight")
         close()
 
-def plot_impact_wrapper(cfg: dict, workdir: str, exp_objs: dict, add_basemap: bool = False):
+
+def plot_wrapper(cfg: dict, workdir: str, exp_objs: dict, add_basemap: bool = False):
     """Plot wrapper
 
     Args:
@@ -95,19 +105,18 @@ def plot_impact_wrapper(cfg: dict, workdir: str, exp_objs: dict, add_basemap: bo
     print("Read basemap for visualization ...")
 
     basemap = None
-    if add_basemap:
+    if cfg["vis"]["basemap"] is not None:
         basemap = read_basemap(cfg["vis"]["basemap"])
 
     baseexp = read_basemap(cfg["input"]["file"])
 
     for proc_vis_name in cfg["vis"]:
 
-        if proc_vis_name == "basemap":
-            continue
-        
-        if not cfg["vis"][proc_vis_name]["enable"]:
+        if proc_vis_name in ["basemap", "extent"]:
             continue
 
+        if not cfg["vis"][proc_vis_name]["enable"]:
+            continue
 
         if proc_vis_name == "exposure":
             for proc_exp in exp_objs:
@@ -121,22 +130,38 @@ def plot_impact_wrapper(cfg: dict, workdir: str, exp_objs: dict, add_basemap: bo
                     basemap,
                     baseexp,
                     exp_objs[hazard_name]["imp"], 
-                    exp_objs[hazard_name]["freq"])
+                    exp_objs[hazard_name]["freq"],
+                    extent=cfg["vis"]["extent"])
 
         if proc_vis_name == "hazard":
             for hazard_name in exp_objs:
-                if hazard_name == "TC":
-                    print("plotting TC ...")
-                    plot_tc(workdir, exp_objs[hazard_name]["hazard"])
-                if hazard_name == "landslide":
-                    print("plotting landslide ...")
-                    plot_landslide(workdir, exp_objs[hazard_name]["hazard"], basemap)
-                if hazard_name == "flood":
-                    print("plotting flood (this may take very long to complete) ...")
-                    exp_objs[hazard_name]["hazard"].plot_intensity(event=0)
-                    plt.savefig(join(workdir, "flood.png"))
-                    plt.close()
-    
+                plot_hazard(
+                    workdir, 
+                    hazard_name, 
+                    cfg, 
+                    exp_objs[hazard_name], 
+                    basemap)
+
+
+def plot_hazard(workdir: str, hazard_name: str, cfg: dict, exp_obj: Exposures, basemap: GeoDataFrame or None):
+    """Plot hazard for climaterisk
+
+    Args:
+        workdir (str): _description_
+        cfg (dict): _description_
+        exp_objs (dict): _description_
+        basemap (GeoDataFrameorNone): _description_
+    """
+    if hazard_name == "TC":
+        print("plotting TC ...")
+        plot_tc(workdir, exp_obj["hazard"])
+    if hazard_name == "landslide":
+        print("plotting landslide ...")
+        plot_landslide(workdir, exp_obj["hazard"], basemap)
+    if hazard_name == "flood":
+        print("plotting flood (this may take very long to complete) ...")
+        plot_flood(workdir, exp_obj["hazard"], 0, extent=cfg["vis"]["extent"], cmap="Reds")
+
 
 def plot_exposure(workdir: str, exposure_obj: Exposures, basemap: GeoDataFrame or None):
     """Plot exposure
@@ -172,7 +197,8 @@ def plot_impact(
     basemap, 
     baseexp, 
     impact_obj: Impact_type, 
-    freq_curve_obj):
+    freq_curve_obj,
+    extent: None or str = None):
     """Plot LitPop
 
     Args:
@@ -190,13 +216,17 @@ def plot_impact(
 
     vrange = get_exposure_range(impact_obj._build_exp().gdf)
 
+    if isinstance(extent, str):
+        extent = eval(extent)
+
     ax = plot_scattered_data(
         impact_obj, 
         f"Expected annual impact from {hazard_name}", 
         axes=ax,
         vmin=vrange["min"],
         vmax=vrange["max"],
-        ignore_zero=False)
+        ignore_zero=False,
+        extent=extent)
 
     # ax.set_xlim(174.7, 174.9)
     # ax.set_ylim(-41.35, -41.25)

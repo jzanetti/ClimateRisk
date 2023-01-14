@@ -19,10 +19,11 @@ hazard:
 
 vis:
   basemap: etc/data/nz_coastlines/nz-coastlines-and-islands-polygons-topo-150k.shp
+  extent: null
   exposure:
-    enable: False
+    enable: True
   hazard:
-    enable: False
+    enable: True
   impact:
     enable: True
 

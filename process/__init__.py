@@ -27,3 +27,5 @@ FLOOD_DATA = "etc/data/riverflood/riverflood_data.pickle"
 GDP2ASSET_DATA = "etc/data/get_gdp/gdp2asset_nz.pickle"
 
 INVALID_KEY = "invalid"
+
+EXPOSURE_POINT_RES = 100
