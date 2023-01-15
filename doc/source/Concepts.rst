@@ -60,6 +60,23 @@ The **Exposures** value can be configued in the ``value_adjustment_option`` sect
 ``litpop``, ``gdp2asset`` and ``value`` cannot be set to ``True`` at the same time. In the ``fix`` section, we need to set whether
 we want to apply ``value`` (in the above configuration it is 30) over the entire **Exposures** (``method: total``), or for each segment (``method: individual``).
 
+Examples for the New Zealand State Highway with different exposure setups are shown below:
+
+- ``left``: with a total state highway asset value of $52b.
+- ``middle``: with a fixed segment value of $1.0.
+- ``right``: using `Litpop` to represent the value.
+
+|pic1| |pic2| |pic3|
+
+.. |pic1| image:: exposure_state_highway1.png
+   :width: 30%
+
+.. |pic2| image:: exposure_state_highway2.png
+   :width: 30%
+
+.. |pic3| image:: exposure_state_highway3.png
+   :width: 30%
+
 2. Hazard
 =========
 

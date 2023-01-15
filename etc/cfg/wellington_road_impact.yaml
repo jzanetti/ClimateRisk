@@ -19,7 +19,10 @@ hazard:
 
 vis:
   basemap: null
-  extent: (174.65, 174.9, -41.37, -41.27)
+  cfg:
+    figsize: (20, 25)
+    fontsize: 25.0
+    extent: (174.65, 174.9, -41.37, -41.27)
   exposure:
     enable: True
   hazard:

@@ -9,6 +9,7 @@ from process.utils import read_basemap, get_exposure_range
 from process.climada.plot import plot_tc, plot_scattered_data, plot_landslide, plot_flood
 from climada.engine.cost_benefit import risk_aai_agg
 from numpy import array
+from process import CMAP
 
 def plot_cost_benefit_wrapper(cfg: dict, workdir: str, exp_objs: dict, cost_benefit_objs: dict, discount_rates: dict):
     """Plot cost-benefit data
@@ -112,7 +113,7 @@ def plot_wrapper(cfg: dict, workdir: str, exp_objs: dict, add_basemap: bool = Fa
 
     for proc_vis_name in cfg["vis"]:
 
-        if proc_vis_name in ["basemap", "extent"]:
+        if proc_vis_name in ["basemap", "extent", "cfg"]:
             continue
 
         if not cfg["vis"][proc_vis_name]["enable"]:
@@ -120,7 +121,7 @@ def plot_wrapper(cfg: dict, workdir: str, exp_objs: dict, add_basemap: bool = Fa
 
         if proc_vis_name == "exposure":
             for proc_exp in exp_objs:
-                plot_exposure(workdir, exp_objs[proc_exp]["exposure"], basemap)
+                plot_exposure(workdir, exp_objs[proc_exp]["exposure"], basemap, cfg["vis"]["cfg"])
 
         if proc_vis_name == "impact":
             for hazard_name in exp_objs:
@@ -163,26 +164,46 @@ def plot_hazard(workdir: str, hazard_name: str, cfg: dict, exp_obj: Exposures, b
         plot_flood(workdir, exp_obj["hazard"], 0, extent=cfg["vis"]["extent"], cmap="Reds")
 
 
-def plot_exposure(workdir: str, exposure_obj: Exposures, basemap: GeoDataFrame or None):
+def plot_exposure(workdir: str, exposure_obj: Exposures, basemap: GeoDataFrame or None, vis_cfg: dict):
     """Plot exposure
 
     Args:
         workdir (str): Working directory
         litpop_obj (Exposures): Exposures map
     """
-    base = None
+    if vis_cfg["figsize"] is not None:
+        figsize = eval(vis_cfg["figsize"])
+
+    fig, base = plt.subplots(figsize=figsize)
+
     if basemap is not None:
-        base = basemap.plot(color='white', edgecolor='black')
+        basemap.plot(ax=base, color="white", edgecolor="black")
 
-    ax = exposure_obj.gdf.plot(ax=base, colormap="jet", column=exposure_obj.gdf.value, figsize=(20, 25), markersize=3, legend=True)
+    ax = exposure_obj.gdf.plot(
+        ax=base, 
+        colormap=CMAP["exposure"], 
+        column=exposure_obj.gdf.value, 
+        markersize=3, 
+        legend=False)
 
-    ax.tick_params(axis='x', which='both', labelsize=7.5)
-    ax.tick_params(axis='y', which='both', labelsize=7.5)
-    ax.set_xlabel("Longitude")
-    ax.set_ylabel("Latitude")
-    ax.set_title("Exposure")
-    #ax.set_xlim(174.7, 174.9)
-    #ax.set_ylim(-41.35, -41.25)
+    if vis_cfg["extent"] is not None:
+        extent = eval(vis_cfg["extent"])
+        ax.set_xlim(extent[0], extent[1])
+        ax.set_ylim(extent[2], extent[3])
+
+    fontsize = None
+    if vis_cfg["fontsize"] is not None:
+        fontsize = vis_cfg["fontsize"]
+
+    ax.tick_params(axis="x", which="both", labelsize=fontsize)
+    ax.tick_params(axis="y", which="both", labelsize=fontsize)
+    ax.set_xlabel("Longitude", fontsize=fontsize)
+    ax.set_ylabel("Latitude", fontsize=fontsize)
+    ax.set_title("Exposure", fontsize=fontsize)
+
+    cbar = fig.colorbar(mappable=ax.collections[1], fraction=0.046, pad=0.04)
+    cbar.ax.tick_params(labelsize=fontsize) 
+    cbar.ax.yaxis.get_offset_text().set_fontsize(fontsize)
 
     savefig(
         join(workdir, "exposure.png"),

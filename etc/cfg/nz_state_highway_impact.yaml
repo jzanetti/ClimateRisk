@@ -6,26 +6,29 @@ input:
     litpop: null
     gdp2asset: null
     fix:
-      method: total # individual or total
-      value: 52000000000
+      method: individual # individual or total
+      value: 1.0 # 52000000000
 
 hazard:
   flood:
-    enable: True
+    enable: False
   landslide:
-    enable: True
+    enable: False
   TC:
     enable: True
 
 vis:
   basemap: etc/data/nz_coastlines/nz-coastlines-and-islands-polygons-topo-150k.shp
-  extent: null
+  cfg:
+    figsize: (20, 25)
+    fontsize: 25.0
+    extent: (165.42, 178.87, -47.14, -34.02)
   exposure:
     enable: True
   hazard:
-    enable: True
+    enable: False
   impact:
-    enable: True
+    enable: False
 
 
 

@@ -28,4 +28,12 @@ GDP2ASSET_DATA = "etc/data/get_gdp/gdp2asset_nz.pickle"
 
 INVALID_KEY = "invalid"
 
-EXPOSURE_POINT_RES = 100
+EXPOSURE_POINT_RES = 1000
+
+
+# ------------------
+# visualization
+# ------------------
+CMAP = {
+    "exposure": "jet"
+}
