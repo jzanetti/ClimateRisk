@@ -68,13 +68,13 @@ Examples for the New Zealand State Highway with different exposure setups are sh
 
 |pic1| |pic2| |pic3|
 
-.. |pic1| image:: exposure_state_highway1.png
+.. |pic1| image:: img/exposure_state_highway1.png
    :width: 30%
 
-.. |pic2| image:: exposure_state_highway2.png
+.. |pic2| image:: img/exposure_state_highway2.png
    :width: 30%
 
-.. |pic3| image:: exposure_state_highway3.png
+.. |pic3| image:: img/exposure_state_highway3.png
    :width: 30%
 
 2. Hazard
