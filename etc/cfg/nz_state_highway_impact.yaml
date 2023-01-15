@@ -23,12 +23,11 @@ vis:
   cfg:
     figsize: (20, 25)
     fontsize: 25.0
-    # extent: (165.42, 178.87, -47.14, -34.02)
-    extent: (174.37, 175.01, -37.16, -36.56)
+    extent: (165.42, 178.87, -47.14, -34.02)
   exposure:
     enable: True
   hazard:
-    enable: False
+    enable: True
   impact:
     enable: False
 
