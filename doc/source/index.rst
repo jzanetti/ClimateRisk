@@ -20,5 +20,6 @@ Contents
    Installation
    Concepts
    Cfg
+   data
    Cookbook
    Reference
