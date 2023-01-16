@@ -8,13 +8,13 @@ Exposure
 =========
 **Exposure** describes the set of assets, people, livelihoods, infrastructures, etc. within an area of interest that to be analyzed.
 
-- In **ClimateRisk**, the baseline of **Exposure** must be provided in the format of *shapefile*. Some examples are provided in ``etc/data``
+* In **ClimateRisk**, the baseline of **Exposure** must be provided in the format of *shapefile*. Some examples are provided in ``etc/data``
 
-- In addition to the baseline, the ``asset value`` must be provided. The value can be either provided as a fixed value, or it can be estimated from ``LitPop`` or ``GDP``.
+* In addition to the baseline, the ``asset value`` must be provided. The value can be either provided as a fixed value, or it can be estimated from ``LitPop`` or ``GDP``.
     The options of ``asset value`` should be defined in the configuration file (Details can be obtained from `Exposure value <https://climaterisk.readthedocs.io/en/latest/Concepts.html#exposure-value>`_).
     ``LitPop`` or ``GDP`` value can be obtained either from **CLIMADA** API, or a preprocessing procedure:
     
-    - ``LitPop`` (in ``process/exposure.py``):
+    * ``LitPop`` (in ``process/exposure.py``):
 
         .. code-block:: python
 
@@ -25,7 +25,7 @@ Exposure
             if isinstance(country, str):
                 litpop_obj = client.get_litpop(country=country)
 
-    - ``GDP`` (in ``etc/data/get_gdp``):
+    * ``GDP`` (in ``etc/data/get_gdp``):
 
         ``GDP`` data must be firstly downloaded from `The Inter-Sectoral Impact Model Intercomparison Project <https://www.isimip.org>`_.
         Then the downloaded ``netcdf`` data can be processed by the *CLIMADA* API as:
