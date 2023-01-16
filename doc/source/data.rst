@@ -41,4 +41,44 @@ Exposure
         
         Where the path is the downloaded data from *ISIMPI*. Then the GDP data can be assigned to the exposure baseline data.
 
+Hazard
+=========
+Currently there are three types of hazards (``Tropical cyclone``, ``landslide`` and ``flood``) can be applied:
 
+- Tropical cyclone: 
+
+    Tropical cyclone (TC) contains two types of dataset: ``track`` and ``wind speed``. In **ClimateRisk** at the moment,
+    ``track`` is  used in the impact or supply-chain calculation, while ``wind speed`` is used for estimating cost-benefit.
+
+
+    There are two ways to obtain the TC data (defined in ``process/hazard.py``):
+
+    - The data can be obtained from the downloaded ``ibtracs`` netcdf file (via ``CLIMADA`` API):
+
+        .. code-block:: python
+
+            from climada.hazard.tc_tracks import TCTracks
+
+            hazard_hist = TCTracks.from_ibtracs_netcdf(
+                provider=tc_data_cfg["track"]["provider"], 
+                year_range=str2list_for_year(tc_data_cfg["track"]["year_range"]), 
+                estimate_missing=True)
+
+    - The data also can be directly obtained from ``CLIMADA`` API as:
+
+        .. code-block:: python
+
+            from climada.util.api_client import Client
+
+            client = Client()
+
+            client.get_hazard(
+                "tropical_cyclone",
+                properties={
+                    "country_name": country,
+                    "climate_scenario": "historical",
+                    "nb_synth_tracks": "10"})
+
+- Landslide:
+
+- Flood:
