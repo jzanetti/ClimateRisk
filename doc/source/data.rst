@@ -80,5 +80,31 @@ Currently there are three types of hazards (``Tropical cyclone``, ``landslide`` 
                     "nb_synth_tracks": "10"})
 
 - Landslide:
+Landslide data are obtained from `NASA global landslide catalog (points) <https://maps.nccs.nasa.gov/arcgis/apps/MapAndAppGallery/index.html?appid=574f26408683485799d02e857e5d9521>`_.
+The **CLIMADA-PETALS** call *Landslide** then can be used to decode the data:
+
+.. code-block:: python
+
+    from process.climada_petals.landslide import Landslide
+
+    landslide = Landslide.from_hist(bbox=domain, input_gdf=LANDSLIDE_DATA, res=res)
+
+The above gives landslide data globally, while for New Zealand, there are a total of 164 events recorded spanning from 1979 to 2018. 
 
 - Flood:
+
+Global flood data can be downloaded from `The Inter-Sectoral Impact Model Intercomparison Project <https://www.isimip.org>`_.
+The netcdf file can be obtained from `Here <https://files.isimip.org/cama-flood/results>`_.
+
+- ``flood depth``: flddph_150arcsec_clm40_gswp3_0.nc
+- ``flood fraction``: fldfrc_150arcsec_clm40_gswp3_0.nc
+
+The downloaded `netCDF` file can be decoded using :
+
+.. code-block:: python
+
+    from climada_petals.hazard.river_flood import RiverFloods
+    years = array(range(1979, 2010, 1)).tolist()
+    rf = RiverFlood.from_nc(countries = ["NZL"], years=years, dph_path=dph_path, frc_path=frc_path)
+
+where ``NZL`` means we only process the data for New Zealand.
