@@ -5,7 +5,7 @@ Welcome to ClimateRisk
 and adaptation analysis, focusing on the New Zealand transportation sector (e.g., State highway, local roads, railway, supply chain, road fatalities etc.).
 
 The base model used in **ClimateRisk** is `CLIMADA <https://wcr.ethz.ch/research/climada.html>`_.
-Additional New Zealand specifications have been added with a range of options for visualization.
+Additional New Zealand specifications have been added with a range of options for visualization. The codes for **ClimateRisk** can be accessed `here <https://github.com/jzanetti/ClimateRisk>`_.
 
 .. note::
 
