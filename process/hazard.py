@@ -72,8 +72,9 @@ def get_tc(tc_type: str, future_hazard_para: dict or None = None, smooth_factor:
 
         hazard_hist.equal_timestep(smooth_factor)
 
-        hazard_hist.calc_perturbed_trajectories(
-            nb_synth_tracks=tc_data_cfg["track"]["pert_tracks"])
+        if tc_data_cfg["track"]["pert_tracks"] > 0:
+            hazard_hist.calc_perturbed_trajectories(
+                nb_synth_tracks=tc_data_cfg["track"]["pert_tracks"])
 
         hazard_future = None
 

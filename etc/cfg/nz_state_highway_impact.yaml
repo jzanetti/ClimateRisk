@@ -3,12 +3,12 @@ name: nz_state_highway
 input:
   file: etc/data/nz-state-highway-centrelines-2012-SHP/nz-state-highway-centrelines-2012.shp
   value_adjustment_option: 
-    litpop: true
+    litpop: false
     gdp2asset: null
-    fix: null
-    #fix:
-    #  method: individual # individual or total
-    #  value: 1.0 # 52000000000
+    # fix: null
+    fix:
+      method: individual # individual or total
+      value: 1.0 # 52000000000 or 1.0
 
 hazard:
   flood:
@@ -25,11 +25,11 @@ vis:
     fontsize: 25.0
     extent: (165.42, 178.87, -47.14, -34.02)
   exposure:
-    enable: True
+    enable: False
   hazard:
     enable: True
   impact:
-    enable: False
+    enable: True
 
 
 

@@ -132,7 +132,7 @@ def plot_wrapper(cfg: dict, workdir: str, exp_objs: dict, add_basemap: bool = Fa
                     baseexp,
                     exp_objs[hazard_name]["imp"], 
                     exp_objs[hazard_name]["freq"],
-                    extent=cfg["vis"]["extent"])
+                    extent=cfg["vis"]["cfg"]["extent"])
 
         if proc_vis_name == "hazard":
             for hazard_name in exp_objs:
@@ -236,6 +236,10 @@ def plot_impact(
         basemap.plot(ax=ax, color='white', edgecolor='black')
 
     vrange = get_exposure_range(impact_obj._build_exp().gdf)
+    #vrange = {
+    #    "min": 0,
+    #    "max": 300000
+    # }
 
     if isinstance(extent, str):
         extent = eval(extent)
@@ -251,6 +255,7 @@ def plot_impact(
 
     # ax.set_xlim(174.7, 174.9)
     # ax.set_ylim(-41.35, -41.25)
+    # ax.set_clim(0, 300000)
 
     savefig(
         join(workdir, f"impact_{hazard_name}.png"),
