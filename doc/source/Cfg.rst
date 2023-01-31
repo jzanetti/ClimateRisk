@@ -2,7 +2,7 @@ Configuration
 #######
 
 
-Calculating Climate impact
+Calculating hazard impact
 ============
 
 The configuration file must be defined before any impact assessment tasks. A basic configuration file is shown below:
@@ -54,8 +54,11 @@ In the above file, there are mainly **4** sections:
 
 .. note::
 
-   Note that for the New Zealand state highway, the total length is 11,000 kilometres (`ref <https://www.nzta.govt.nz/roads-and-rail/research-and-data/state-highway-frequently-asked-questions/>`_.), and
+   - Note that for the New Zealand state highway, the total length is 11,000 kilometres (`ref <https://www.nzta.govt.nz/roads-and-rail/research-and-data/state-highway-frequently-asked-questions/>`_.), and 
    the total estimated asset value is NZD$52 billion (`ref <https://www.nzta.govt.nz/planning-and-investment/national-land-transport-programme/2021-24-nltp/activity-classes/state-highway-maintenance/>`_).
+
+   - By default, the output from **Climaterisk** represnets annual hazard impact. The accumulated impact can be switched on by setting ``use_all_years=True`` in the function ``update_exposure``.
+
 
 Calculating Cost-benefit
 ============

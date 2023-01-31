@@ -6,12 +6,24 @@ from climada.engine.impact import Impact as Impact_type
 from geopandas import GeoDataFrame
 import matplotlib.pyplot as plt
 from process.utils import read_basemap, get_exposure_range
-from process.climada.plot import plot_tc, plot_scattered_data, plot_landslide, plot_flood
+from process.climada.plot import (
+    plot_tc,
+    plot_scattered_data,
+    plot_landslide,
+    plot_flood,
+)
 from climada.engine.cost_benefit import risk_aai_agg
 from numpy import array
 from process import CMAP
 
-def plot_cost_benefit_wrapper(cfg: dict, workdir: str, exp_objs: dict, cost_benefit_objs: dict, discount_rates: dict):
+
+def plot_cost_benefit_wrapper(
+    cfg: dict,
+    workdir: str,
+    exp_objs: dict,
+    cost_benefit_objs: dict,
+    discount_rates: dict,
+):
     """Plot cost-benefit data
 
     Args:
@@ -30,68 +42,79 @@ def plot_cost_benefit_wrapper(cfg: dict, workdir: str, exp_objs: dict, cost_bene
         # plot event view
         f = plt.figure(figsize=(10, 7))
         ax = f.add_subplot()
-        cost_benefit_objs["cost_benefit"][hazard_type].plot_event_view((10, 25, 50, 100), axis=ax)
+        cost_benefit_objs["cost_benefit"][hazard_type].plot_event_view(
+            (10, 25, 50, 100), axis=ax
+        )
         ax.set_title("Impact for different adaptation measures")
 
         colors = {}
         for measure_method in cfg["adaptation"][hazard_type]:
-            colors[measure_method] = eval(cfg["adaptation"][hazard_type][measure_method]["color_rgb"])
+            colors[measure_method] = eval(
+                cfg["adaptation"][hazard_type][measure_method]["color_rgb"]
+            )
             labels = list(colors.keys())
-            handles = [plt.Rectangle((0,0), 1, 1, color=colors[label]) for label in labels]
+            handles = [
+                plt.Rectangle((0, 0), 1, 1, color=colors[label]) for label in labels
+            ]
             plt.legend(handles, labels)
 
         savefig(
             join(workdir, f"impact_for_different_adaptations_{hazard_type}.png"),
-            bbox_inches="tight")
+            bbox_inches="tight",
+        )
         close()
 
         # plot waterfall view
         f = plt.figure(figsize=(10, 7))
         ax = f.add_subplot()
         cost_benefit_objs["cost_benefit"][hazard_type].plot_waterfall(
-            exp_objs["hist"][hazard_type]["hazard"], 
-            cost_benefit_objs["adaptation_measures"][hazard_type]["hist"], 
-            exp_objs["future"][hazard_type]["hazard"], 
+            exp_objs["hist"][hazard_type]["hazard"],
+            cost_benefit_objs["adaptation_measures"][hazard_type]["hist"],
+            exp_objs["future"][hazard_type]["hazard"],
             cost_benefit_objs["adaptation_measures"][hazard_type]["future"],
             risk_func=risk_aai_agg,
-            axis=ax)
-        savefig(
-            join(workdir, f"risk_{hazard_type}.png"),
-            bbox_inches="tight")
+            axis=ax,
+        )
+        savefig(join(workdir, f"risk_{hazard_type}.png"), bbox_inches="tight")
         close()
 
         # plot cost-benefit
         f = plt.figure(figsize=(10, 7))
         ax = f.add_subplot()
         ax = cost_benefit_objs["cost_benefit"][hazard_type].plot_cost_benefit()
-        savefig(
-            join(workdir, f"cost_benefit_{hazard_type}.png"),
-            bbox_inches="tight")
+        savefig(join(workdir, f"cost_benefit_{hazard_type}.png"), bbox_inches="tight")
         close()
 
         # plot EFC
-        efc_present = cost_benefit_objs["cost_benefit"][hazard_type].imp_meas_present['no measure']['efc']
-        efc_future = cost_benefit_objs["cost_benefit"][hazard_type].imp_meas_future['no measure']['efc']
-        efc_combined_measures = cost_benefit_objs["cost_benefit"][hazard_type].combine_measures(
-            list(cfg["adaptation"][hazard_type].keys()),
-            "Combine measure",
-            new_color = array([0.1, 0.8, 0.9]),
-            disc_rates = discount_rates[hazard_type]
-        ).imp_meas_future['Combine measure']['efc']
+        efc_present = cost_benefit_objs["cost_benefit"][hazard_type].imp_meas_present[
+            "no measure"
+        ]["efc"]
+        efc_future = cost_benefit_objs["cost_benefit"][hazard_type].imp_meas_future[
+            "no measure"
+        ]["efc"]
+        efc_combined_measures = (
+            cost_benefit_objs["cost_benefit"][hazard_type]
+            .combine_measures(
+                list(cfg["adaptation"][hazard_type].keys()),
+                "Combine measure",
+                new_color=array([0.1, 0.8, 0.9]),
+                disc_rates=discount_rates[hazard_type],
+            )
+            .imp_meas_future["Combine measure"]["efc"]
+        )
 
         ax = plt.subplot(1, 1, 1)
-        efc_present.plot(axis=ax, color='blue', label='Present')
-        efc_future.plot(axis=ax, color='orange', label='Future, unadapted')
-        efc_combined_measures.plot(axis=ax, color='green', label='Future, adapted')
+        efc_present.plot(axis=ax, color="blue", label="Present")
+        efc_future.plot(axis=ax, color="orange", label="Future, unadapted")
+        efc_combined_measures.plot(axis=ax, color="green", label="Future, adapted")
         ax.legend()
 
         plt.xlim([0, 100])
         index = efc_future.return_per.tolist().index(
-            min(efc_future.return_per, key=lambda x:abs(x - 100.0))) # return year 100
+            min(efc_future.return_per, key=lambda x: abs(x - 100.0))
+        )  # return year 100
         plt.ylim([0, efc_future.impact[index] * 1.3])
-        savefig(
-            join(workdir, f"efc_{hazard_type}.png"),
-            bbox_inches="tight")
+        savefig(join(workdir, f"efc_{hazard_type}.png"), bbox_inches="tight")
         close()
 
 
@@ -121,30 +144,34 @@ def plot_wrapper(cfg: dict, workdir: str, exp_objs: dict, add_basemap: bool = Fa
 
         if proc_vis_name == "exposure":
             for proc_exp in exp_objs:
-                plot_exposure(workdir, exp_objs[proc_exp]["exposure"], basemap, cfg["vis"]["cfg"])
+                plot_exposure(
+                    workdir, exp_objs[proc_exp]["exposure"], basemap, cfg["vis"]["cfg"]
+                )
 
         if proc_vis_name == "impact":
             for hazard_name in exp_objs:
                 plot_impact(
-                    workdir, 
-                    hazard_name, 
+                    workdir,
+                    hazard_name,
                     basemap,
                     baseexp,
-                    exp_objs[hazard_name]["imp"], 
+                    exp_objs[hazard_name]["imp"],
                     exp_objs[hazard_name]["freq"],
-                    extent=cfg["vis"]["cfg"]["extent"])
+                    extent=cfg["vis"]["cfg"]["extent"],
+                )
 
         if proc_vis_name == "hazard":
             for hazard_name in exp_objs:
-                plot_hazard(
-                    workdir, 
-                    hazard_name, 
-                    cfg, 
-                    exp_objs[hazard_name], 
-                    basemap)
+                plot_hazard(workdir, hazard_name, cfg, exp_objs[hazard_name], basemap)
 
 
-def plot_hazard(workdir: str, hazard_name: str, cfg: dict, exp_obj: Exposures, basemap: GeoDataFrame or None):
+def plot_hazard(
+    workdir: str,
+    hazard_name: str,
+    cfg: dict,
+    exp_obj: Exposures,
+    basemap: GeoDataFrame or None,
+):
     """Plot hazard for climaterisk
 
     Args:
@@ -161,10 +188,14 @@ def plot_hazard(workdir: str, hazard_name: str, cfg: dict, exp_obj: Exposures, b
         plot_landslide(workdir, exp_obj["hazard"], basemap)
     if hazard_name == "flood":
         print("plotting flood (this may take very long to complete) ...")
-        plot_flood(workdir, exp_obj["hazard"], 0, extent=cfg["vis"]["extent"], cmap="Reds")
+        plot_flood(
+            workdir, exp_obj["hazard"], 0, extent=cfg["vis"]["extent"], cmap="Reds"
+        )
 
 
-def plot_exposure(workdir: str, exposure_obj: Exposures, basemap: GeoDataFrame or None, vis_cfg: dict):
+def plot_exposure(
+    workdir: str, exposure_obj: Exposures, basemap: GeoDataFrame or None, vis_cfg: dict
+):
     """Plot exposure
 
     Args:
@@ -180,11 +211,12 @@ def plot_exposure(workdir: str, exposure_obj: Exposures, basemap: GeoDataFrame o
         basemap.plot(ax=base, color="white", edgecolor="black")
 
     ax = exposure_obj.gdf.plot(
-        ax=base, 
-        colormap=CMAP["exposure"], 
-        column=exposure_obj.gdf.value, 
-        markersize=3, 
-        legend=False)
+        ax=base,
+        colormap=CMAP["exposure"],
+        column=exposure_obj.gdf.value,
+        markersize=3,
+        legend=False,
+    )
 
     if vis_cfg["extent"] is not None:
         extent = eval(vis_cfg["extent"])
@@ -202,24 +234,22 @@ def plot_exposure(workdir: str, exposure_obj: Exposures, basemap: GeoDataFrame o
     ax.set_title("Exposure", fontsize=fontsize)
 
     cbar = fig.colorbar(mappable=ax.collections[1], fraction=0.046, pad=0.04)
-    cbar.ax.tick_params(labelsize=fontsize) 
+    cbar.ax.tick_params(labelsize=fontsize)
     cbar.ax.yaxis.get_offset_text().set_fontsize(fontsize)
 
-    savefig(
-        join(workdir, "exposure.png"),
-        bbox_inches='tight',
-        dpi=200)
+    savefig(join(workdir, "exposure.png"), bbox_inches="tight", dpi=200)
     close()
 
 
 def plot_impact(
-    workdir: str, 
-    hazard_name: str, 
-    basemap, 
-    baseexp, 
-    impact_obj: Impact_type, 
+    workdir: str,
+    hazard_name: str,
+    basemap,
+    baseexp,
+    impact_obj: Impact_type,
     freq_curve_obj,
-    extent: None or str = None):
+    extent: None or str = None,
+):
     """Plot LitPop
 
     Args:
@@ -229,43 +259,38 @@ def plot_impact(
 
     f = plt.figure(figsize=(8, 15))
     ax = f.add_subplot(projection=PlateCarree())
-    baseexp.to_crs(4326).plot(
-        ax=ax, color="k", edgecolor='black')
-    
+    baseexp.to_crs(4326).plot(ax=ax, color="k", edgecolor="black")
+
     if basemap is not None:
-        basemap.plot(ax=ax, color='white', edgecolor='black')
+        basemap.plot(ax=ax, color="white", edgecolor="black")
 
     vrange = get_exposure_range(impact_obj._build_exp().gdf)
-    #vrange = {
-    #    "min": 0,
-    #    "max": 300000
-    # }
+    vrange = {"min": 0, "max": 1.0}
 
     if isinstance(extent, str):
         extent = eval(extent)
 
     ax = plot_scattered_data(
-        impact_obj, 
-        f"Expected annual impact from {hazard_name}", 
+        impact_obj,
+        f"Expected annual impact from {hazard_name}",
         axes=ax,
         vmin=vrange["min"],
         vmax=vrange["max"],
         ignore_zero=False,
-        extent=extent)
+        extent=extent,
+    )
 
     # ax.set_xlim(174.7, 174.9)
     # ax.set_ylim(-41.35, -41.25)
     # ax.set_clim(0, 300000)
 
-    savefig(
-        join(workdir, f"impact_{hazard_name}.png"),
-        bbox_inches='tight',
-        dpi=200)
+    savefig(join(workdir, f"impact_{hazard_name}.png"), bbox_inches="tight", dpi=200)
     close()
 
     freq_curve_obj.plot()
     savefig(
         join(workdir, f"impact_frequemcy_{hazard_name}.png"),
-        bbox_inches='tight',
-        dpi=200)
+        bbox_inches="tight",
+        dpi=200,
+    )
     close()

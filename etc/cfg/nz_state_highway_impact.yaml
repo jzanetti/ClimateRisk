@@ -27,7 +27,7 @@ vis:
   exposure:
     enable: False
   hazard:
-    enable: True
+    enable: False
   impact:
     enable: True
 

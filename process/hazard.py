@@ -11,8 +11,12 @@ from climada.util.api_client import Client
 from process import INVALID_KEY
 from climada.hazard import Hazard
 
-def get_hazard(hazard_cfg: dict, future_hazard_para: dict or None or str = INVALID_KEY, task_type: str = "impact", tc_data_cfg: dict = TC_DATA) -> dict:
-    """Get hazard
+def get_hazard(
+    hazard_cfg: dict, 
+    future_hazard_para: dict or None or str = INVALID_KEY, 
+    task_type: str = "impact", 
+    tc_data_cfg: dict = TC_DATA) -> dict:
+    """Get hazard for climaterisk
 
     Args:
         hazard_cfg (dict): Hazard configuration
@@ -36,11 +40,14 @@ def get_hazard(hazard_cfg: dict, future_hazard_para: dict or None or str = INVAL
         if proc_hazard_name == "TC":
             
             if task_type == "impact":
-                hazards[proc_hazard_name] = get_tc(tc_type="track", future_hazard_para=future_hazard_para, tc_data_cfg=tc_data_cfg)
+                hazards[proc_hazard_name] = get_tc(
+                    tc_type="track", future_hazard_para=future_hazard_para, tc_data_cfg=tc_data_cfg)
             elif task_type == "cost_benefit":
-                hazards[proc_hazard_name] = get_tc(tc_type="wind", future_hazard_para=future_hazard_para, tc_data_cfg=tc_data_cfg)
+                hazards[proc_hazard_name] = get_tc(
+                    tc_type="wind", future_hazard_para=future_hazard_para, tc_data_cfg=tc_data_cfg)
             elif task_type == "supplychain":
-                hazards[proc_hazard_name] = get_tc(tc_type="track2", future_hazard_para=future_hazard_para, tc_data_cfg=tc_data_cfg)
+                hazards[proc_hazard_name] = get_tc(
+                    tc_type="track2", future_hazard_para=future_hazard_para, tc_data_cfg=tc_data_cfg)
 
         elif proc_hazard_name == "landslide":
 

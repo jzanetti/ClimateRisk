@@ -10,6 +10,7 @@ from numpy import linspace, sort, array
 from climada_petals.entity.impact_funcs.river_flood import flood_imp_func_set
 from process.adaptation import define_adaptation
 
+
 def get_impact(hazard_cfg: dict) -> dict:
     """Return an impact function
 
@@ -41,7 +42,6 @@ def get_impact(hazard_cfg: dict) -> dict:
             raise Exception(f"Hazard type {proc_hazard_name} is not supported yet ...")
 
         impf_set[proc_hazard_name].append(proc_func)
-
 
     return impf_set
 
@@ -78,7 +78,12 @@ def calculate_impact_func(exposure_objs: dict) -> Impact_type:
 
         proc_exposure_obj = exposure_objs[hazard_name]
 
-        imp.calc(proc_exposure_obj["exposure"], proc_exposure_obj["impact"], proc_exposure_obj["updated_hazard"], save_mat=True)
+        imp.calc(
+            proc_exposure_obj["exposure"],
+            proc_exposure_obj["impact"],
+            proc_exposure_obj["updated_hazard"],
+            save_mat=True,
+        )
 
         freq_curve = imp.calc_freq_curve()
 
@@ -86,7 +91,7 @@ def calculate_impact_func(exposure_objs: dict) -> Impact_type:
             "imp": imp,
             "freq": freq_curve,
             "exposure": proc_exposure_obj["exposure"],
-            "hazard": proc_exposure_obj["hazard"]
+            "hazard": proc_exposure_obj["hazard"],
         }
 
     return outputs
@@ -109,8 +114,9 @@ def landslide_impact_func(num: int = 15) -> ImpactFunc:
     impf_LS_hist.intensity_unit = "m/m"
     impf_LS_hist.intensity = linspace(0, 1, num=num)
     impf_LS_hist.mdd = sort(
-        array([0, 0, 0, 0, 0, 0, 0, 0, 1., 1., 1., 1., 1., 1., 1.]))
+        array([0, 0, 0, 0, 0, 0, 0, 0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
+    )
     impf_LS_hist.paa = sort(linspace(1, 1, num=num))
     impf_LS_hist.check()
-    
+
     return impf_LS_hist

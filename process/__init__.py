@@ -10,7 +10,7 @@ TC_DATA = {
     "track": {
         "provider": "wellington",
         "year_range": None, # # 2010-2012 or None
-        "pert_tracks": 1
+        "pert_tracks": 0
     },
     "wind": {
         "pert_tracks": 10

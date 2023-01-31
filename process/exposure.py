@@ -1,26 +1,26 @@
-from climada.util.api_client import Client
-from process import RISK_COUNTRY, FUTURE_YEARS
-from climada.entity.exposures.base import Exposures
-from process.utils import get_hazard_info, check_exposure_value
-from climada.entity.impact_funcs import impact_func_set
-from geopandas import read_file
-import climada.util.lines_polys_handler as u_lp
-from shapely.wkb import loads as wkb_loads
-from shapely.wkb import dumps as wkb_dumps
-from numpy import array as numpy_array
-from scipy.spatial import cKDTree
-
-from pandas import concat, Series
-from geopandas import GeoDataFrame
-
-from climada.hazard import TropCyclone
-from process.utils import gdf2centroids
-
-from pickle import load as pickle_load
-from process import GDP2ASSET_DATA, EXPOSURE_POINT_RES
 from copy import deepcopy
+from pickle import load as pickle_load
 
-def apply_asset_to_exposure(exp_obj: GeoDataFrame, litpop_obj: GeoDataFrame) -> GeoDataFrame:
+import climada.util.lines_polys_handler as u_lp
+from climada.entity.exposures.base import Exposures
+from climada.entity.impact_funcs import impact_func_set
+from climada.hazard import TropCyclone
+from climada.util.api_client import Client
+from geopandas import GeoDataFrame, read_file
+from numpy import array as numpy_array
+from numpy import ones as numpy_ones
+from pandas import Series, concat
+from scipy.spatial import cKDTree
+from shapely.wkb import dumps as wkb_dumps
+from shapely.wkb import loads as wkb_loads
+
+from process import EXPOSURE_POINT_RES, FUTURE_YEARS, GDP2ASSET_DATA, RISK_COUNTRY
+from process.utils import check_exposure_value, gdf2centroids, get_hazard_info
+
+
+def apply_asset_to_exposure(
+    exp_obj: GeoDataFrame, litpop_obj: GeoDataFrame
+) -> GeoDataFrame:
     """Apply Litpop/gdp2asset value to an exposure
 
     Args:
@@ -38,21 +38,22 @@ def apply_asset_to_exposure(exp_obj: GeoDataFrame, litpop_obj: GeoDataFrame) -> 
     litpop_n = numpy_array(list(litpop_obj.geometry.apply(lambda x: (x.x, x.y))))
     litpop_btree = cKDTree(litpop_n)
     dist, idx = litpop_btree.query(exp_n, k=1)
-    lippop_nearest = litpop_obj.iloc[idx].drop(columns="geometry").reset_index(drop=True)
+    lippop_nearest = (
+        litpop_obj.iloc[idx].drop(columns="geometry").reset_index(drop=True)
+    )
 
     exp_obj = exp_obj.drop(columns=["value", "latitude", "longitude"])
     gdf = concat(
-            [
-                exp_obj.reset_index(drop=True),
-                lippop_nearest,
-                Series(dist, name='dist')
-            ], 
-        axis=1)
+        [exp_obj.reset_index(drop=True), lippop_nearest, Series(dist, name="dist")],
+        axis=1,
+    )
 
     return gdf
 
 
-def get_exposure(input_cfg: dict, economy_growth: float or None = None, add_future: bool = False) -> Exposures:
+def get_exposure(
+    input_cfg: dict, economy_growth: float or None = None, add_future: bool = False
+) -> Exposures:
     """Get exposure object
 
     Args:
@@ -67,7 +68,6 @@ def get_exposure(input_cfg: dict, economy_growth: float or None = None, add_futu
     else:
         raise Exception("input file type is not supported yet")
 
-
     print("Updating exposure object value ...")
 
     check_exposure_value(input_cfg["value_adjustment_option"])
@@ -77,12 +77,13 @@ def get_exposure(input_cfg: dict, economy_growth: float or None = None, add_futu
         print("Applying fixed value ...")
 
         if input_cfg["value_adjustment_option"]["fix"]["method"] == "total":
-            exp_obj.gdf.value  = exp_obj.gdf.geometry_orig.length * (
-                input_cfg["value_adjustment_option"]["fix"]["value"] / 
-                exp_obj.gdf.geometry_orig.length.sum())
+            exp_obj.gdf.value = exp_obj.gdf.geometry_orig.length * (
+                input_cfg["value_adjustment_option"]["fix"]["value"]
+                / exp_obj.gdf.geometry_orig.length.sum()
+            )
 
         elif input_cfg["value_adjustment_option"]["fix"]["method"] == "individual":
-            exp_obj.gdf.value  = input_cfg["value_adjustment_option"]["fix"]["value"]
+            exp_obj.gdf.value = input_cfg["value_adjustment_option"]["fix"]["value"]
 
     else:
 
@@ -98,16 +99,17 @@ def get_exposure(input_cfg: dict, economy_growth: float or None = None, add_futu
 
         exp_obj.gdf = apply_asset_to_exposure(exp_obj.gdf, ref_obj.gdf)
 
-    exp_obj.gdf.plot()
     future_exp_obj = None
 
     if add_future:
-        future_exp_obj = add_future_exp(exp_obj, annual_growth_rate=economy_growth) 
+        future_exp_obj = add_future_exp(exp_obj, annual_growth_rate=economy_growth)
 
     return {"hist": exp_obj, "future": future_exp_obj}
 
 
-def add_future_exp(exp_present: Exposures, annual_growth_rate: float = 0.02) -> Exposures:
+def add_future_exp(
+    exp_present: Exposures, annual_growth_rate: float = 0.02
+) -> Exposures:
     """_summary_
 
     Args:
@@ -131,42 +133,48 @@ def add_future_exp(exp_present: Exposures, annual_growth_rate: float = 0.02) -> 
 
 
 def get_exp_obj_latlon(exp_obj: Exposures) -> dict:
-    """_summary_
-    """
+    """_summary_"""
     return {
-            "lats": [min(exp_obj.gdf["latitude"]), max(exp_obj.gdf["latitude"])],
-            "lons": [min(exp_obj.gdf["longitude"]), max(exp_obj.gdf["longitude"])]
-        }
+        "lats": [min(exp_obj.gdf["latitude"]), max(exp_obj.gdf["latitude"])],
+        "lons": [min(exp_obj.gdf["longitude"]), max(exp_obj.gdf["longitude"])],
+    }
 
 
 def update_exposure(
-    exp_obj: Exposures, 
-    impacts: dict, 
+    exp_obj: Exposures,
+    impacts: dict,
     hazards: dict,
     exp_flag: str = "hist",
-    task_type: str = "impact") -> dict:
+    task_type: str = "impact",
+    use_all_years: bool = False,
+) -> dict:
     """Combining Exposure with Impact function
 
     Args:
         exp_obj (Exposures): Exposure object
         impact_func (dict): Impact function in a dict
+        use_all_years (bool): the hazard intensity is accumulated. Otherwise it is averaged to a single year.
 
     Returns:
-        dict: Impact function dependant Exposure 
+        dict: Impact function dependant Exposure
     """
 
     outputs = {}
 
     for hazard_name in impacts:
-        
+
         exposure_obj = assign_impact(exp_obj[exp_flag], impacts[hazard_name])
-        
+
         if hazard_name == "TC":
 
             if task_type == "impact":
                 update_hazard = TropCyclone.from_tracks(
-                    hazards[hazard_name][exp_flag], 
-                    centroids=gdf2centroids(exposure_obj.gdf))
+                    hazards[hazard_name][exp_flag],
+                    centroids=gdf2centroids(exposure_obj.gdf),
+                )
+                if use_accum:
+                    update_hazard.frequency = numpy_ones(len(update_hazard.frequency))
+
             elif task_type == "supplychain":
                 update_hazard = hazards[hazard_name][exp_flag]
             elif task_type == "cost_benefit":
@@ -182,13 +190,15 @@ def update_exposure(
             "exposure": exposure_obj,
             "impact": impacts[hazard_name],
             "updated_hazard": update_hazard,
-            "hazard": hazards[hazard_name][exp_flag]
+            "hazard": hazards[hazard_name][exp_flag],
         }
 
     return outputs
 
 
-def get_from_shp(shp_file: str, res: int = EXPOSURE_POINT_RES, crs_target: int or None = 4326) -> Exposures:
+def get_from_shp(
+    shp_file: str, res: int = EXPOSURE_POINT_RES, crs_target: int or None = 4326
+) -> Exposures:
     """Get shapefile object
 
     Args:
@@ -207,7 +217,11 @@ def get_from_shp(shp_file: str, res: int = EXPOSURE_POINT_RES, crs_target: int o
     exp_obj.gdf["value"] = 1
 
     exp_obj = u_lp.exp_geom_to_pnt(
-         exp_obj, res=res, to_meters=True, disagg_met=u_lp.DisaggMethod.FIX, disagg_val=None
+        exp_obj,
+        res=res,
+        to_meters=True,
+        disagg_met=u_lp.DisaggMethod.FIX,
+        disagg_val=None,
     )
 
     """
@@ -225,7 +239,9 @@ def get_from_shp(shp_file: str, res: int = EXPOSURE_POINT_RES, crs_target: int o
     return exp_obj
 
 
-def get_from_litpop(latlon: dict or None = None, country: str or list = RISK_COUNTRY) -> Exposures:
+def get_from_litpop(
+    latlon: dict or None = None, country: str or list = RISK_COUNTRY
+) -> Exposures:
     """Get Litpop data
 
     Returns:
@@ -246,10 +262,11 @@ def get_from_litpop(latlon: dict or None = None, country: str or list = RISK_COU
     if latlon is not None:
         gdf = litpop_obj.gdf
         filtered_gdf = gdf[
-            (gdf['latitude'] >= latlon["lats"][0]) & 
-            (gdf['latitude'] <= latlon["lats"][1]) &
-            (gdf['longitude'] >= latlon["lons"][0]) & 
-            (gdf['longitude'] <= latlon["lons"][1])]
+            (gdf["latitude"] >= latlon["lats"][0])
+            & (gdf["latitude"] <= latlon["lats"][1])
+            & (gdf["longitude"] >= latlon["lons"][0])
+            & (gdf["longitude"] <= latlon["lons"][1])
+        ]
 
         litpop_obj.gdf = filtered_gdf
 
@@ -270,10 +287,11 @@ def get_from_gdp(latlon: dict or None = None, gdp_year: int = 2000) -> Exposures
     if latlon is not None:
         gdf = gdp2asset_obj.gdf
         filtered_gdf = gdf[
-            (gdf['latitude'] >= latlon["lats"][0]) & 
-            (gdf['latitude'] <= latlon["lats"][1]) &
-            (gdf['longitude'] >= latlon["lons"][0]) & 
-            (gdf['longitude'] <= latlon["lons"][1])]
+            (gdf["latitude"] >= latlon["lats"][0])
+            & (gdf["latitude"] <= latlon["lats"][1])
+            & (gdf["longitude"] >= latlon["lons"][0])
+            & (gdf["longitude"] <= latlon["lons"][1])
+        ]
 
         gdp2asset_obj.gdf = filtered_gdf
 
@@ -291,7 +309,9 @@ def assign_impact(exp_obj, impact_func: impact_func_set):
         _type_: _description_
     """
     hazard_info = get_hazard_info(impact_func)
-    exp_obj.gdf.rename(columns={"impf_": "impf_" + hazard_info["haz_type"]}, inplace=True)
-    exp_obj.gdf['impf_' + hazard_info["haz_type"]] = hazard_info["haz_id"]
+    exp_obj.gdf.rename(
+        columns={"impf_": "impf_" + hazard_info["haz_type"]}, inplace=True
+    )
+    exp_obj.gdf["impf_" + hazard_info["haz_type"]] = hazard_info["haz_id"]
 
     return exp_obj
