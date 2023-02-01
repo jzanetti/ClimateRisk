@@ -65,7 +65,7 @@ In the above file, there are mainly **4** sections:
 
 - ``hazard``: This defines the types of hazards to be used for the climate risk assessment. Currently ``landslide``, ``TC (Tropical Cyclone)`` and ``flood`` are supported. Details can be obtained at `Hazard <https://climaterisk.readthedocs.io/en/latest/Concepts.html#hazard>`_. An impact function will be assigned automatically depending on the required ``hazard(s)`` in the configuration file. Note that each hazard must be configured seperately in ``cfg``:
 
-    - For ``topical cyclone``: # Set up hazard types:
+    - For example, for ``topical cyclone`` we have:
 
         - ``climate_scenario``: rcp26, rcp45, rcp60 or historical
 
