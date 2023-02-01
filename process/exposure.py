@@ -101,6 +101,8 @@ def get_exposure(
 
     future_exp_obj = None
 
+    exp_obj.value_unit = "NZD"
+
     if add_future:
         future_exp_obj = add_future_exp(exp_obj, annual_growth_rate=economy_growth)
 
@@ -145,7 +147,7 @@ def update_exposure(
     impacts: dict,
     hazards: dict,
     exp_flag: str = "hist",
-    task_type: str = "impact"
+    task_type: str = "impact",
 ) -> dict:
     """Combining Exposure with Impact function
 

@@ -118,7 +118,9 @@ def plot_cost_benefit_wrapper(
         close()
 
 
-def plot_wrapper(cfg: dict, workdir: str, exp_objs: dict, add_basemap: bool = False):
+def plot_wrapper(
+    cfg: dict, workdir: str, exp_objs: dict, **kwargs
+):
     """Plot wrapper
 
     Args:
@@ -150,6 +152,7 @@ def plot_wrapper(cfg: dict, workdir: str, exp_objs: dict, add_basemap: bool = Fa
 
         if proc_vis_name == "impact":
             for hazard_name in exp_objs:
+
                 plot_impact(
                     workdir,
                     hazard_name,
@@ -158,6 +161,7 @@ def plot_wrapper(cfg: dict, workdir: str, exp_objs: dict, add_basemap: bool = Fa
                     exp_objs[hazard_name]["imp"],
                     exp_objs[hazard_name]["freq"],
                     extent=cfg["vis"]["cfg"]["extent"],
+                    other_cfg=kwargs,
                 )
 
         if proc_vis_name == "hazard":
@@ -249,6 +253,7 @@ def plot_impact(
     impact_obj: Impact_type,
     freq_curve_obj,
     extent: None or str = None,
+    other_cfg: dict = {},
 ):
     """Plot LitPop
 
@@ -265,7 +270,7 @@ def plot_impact(
         basemap.plot(ax=ax, color="white", edgecolor="black")
 
     vrange = get_exposure_range(impact_obj._build_exp().gdf)
-    # vrange = {"min": 0, "max": 500000}
+    vrange = {"min": 0, "max": 0.75e8}
 
     if isinstance(extent, str):
         extent = eval(extent)
@@ -279,12 +284,11 @@ def plot_impact(
         ignore_zero=True,
         extent=extent,
         alpha=0.75,
-        s=12.0,
+        s=10.0,
     )
 
-    # ax.set_xlim(174.7, 174.9)
-    # ax.set_ylim(-41.35, -41.25)
-    # ax.set_clim(0, 300000)
+    if "title" in other_cfg:
+        ax.set_title(other_cfg["title"])
 
     savefig(join(workdir, f"impact_{hazard_name}.png"), bbox_inches="tight", dpi=200)
     close()

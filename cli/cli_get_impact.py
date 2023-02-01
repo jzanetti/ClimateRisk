@@ -45,7 +45,7 @@ def setup_parser():
         #    "--workdir",
         #    "/tmp/climaterisk",
         #    "--cfg",
-        #    "etc/cfg/nz_state_highway_impact_rcp60.yaml",
+        #    "etc/cfg/nz_state_highway_impact_hist.yaml",
         # ]
     )
 
