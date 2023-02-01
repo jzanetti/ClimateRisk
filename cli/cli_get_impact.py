@@ -45,7 +45,7 @@ def setup_parser():
         #    "--workdir",
         #    "/tmp/climaterisk",
         #    "--cfg",
-        #    "etc/cfg/nz_state_highway_impact.yaml",
+        #    "etc/cfg/nz_state_highway_impact_rcp60.yaml",
         # ]
     )
 
@@ -70,7 +70,7 @@ def get_data():
     impacts = get_impact(cfg["hazard"])
 
     print("Combining exposure, impact and hazard ...")
-    exp_objs = update_exposure(exp_obj, impacts, hazards, use_all_years=False)
+    exp_objs = update_exposure(exp_obj, impacts, hazards)
 
     print("Calculating impacts ...")
     exp_objs = calculate_impact_func(exp_objs)

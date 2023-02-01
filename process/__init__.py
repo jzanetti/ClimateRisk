@@ -9,17 +9,15 @@ FUTURE_YEARS = 2080
 TC_DATA = {
     "track": {
         "provider": "wellington",
-        "year_range": None, # # 2010-2012 or None
-        "pert_tracks": 0
+        "year_range": None,  # # 2010-2012 or None
+        "pert_tracks": 0,
     },
-    "wind": {
-        "pert_tracks": 10
-    },
+    "wind": {"pert_tracks": 10},
     "track2": {
         "countries": ["New Zealand", "Japan", "Australia", "China"],
-        "year_range": "2010-2011", # # 2010-2012 or None
-        "pert_tracks": 1
-    }
+        "year_range": "2010-2011",  # # 2010-2012 or None
+        "pert_tracks": 1,
+    },
 }
 
 LANDSLIDE_DATA = "etc/data/nasa_global_landslide_catalog_point/nasa_global_landslide_catalog_point.shp"
@@ -34,6 +32,16 @@ EXPOSURE_POINT_RES = 1000
 # ------------------
 # visualization
 # ------------------
-CMAP = {
-    "exposure": "jet"
+CMAP = {"exposure": "jet"}
+
+
+# ------------------
+# RCP assumptions
+# ------------------
+RCP_ADJUSTMENT = {
+    "tc_wind": {
+        "rcp26": 1.2,
+        "rcp45": 1.5,
+        "rcp60": 1.8,
+    }
 }

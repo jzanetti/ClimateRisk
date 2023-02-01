@@ -265,7 +265,7 @@ def plot_impact(
         basemap.plot(ax=ax, color="white", edgecolor="black")
 
     vrange = get_exposure_range(impact_obj._build_exp().gdf)
-    vrange = {"min": 0, "max": 1.0}
+    vrange = {"min": 0, "max": 500000}
 
     if isinstance(extent, str):
         extent = eval(extent)

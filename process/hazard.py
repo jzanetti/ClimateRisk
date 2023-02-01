@@ -1,28 +1,28 @@
 from climada.hazard import TCTracks
 from process.vis import plot_tc
 from climada.hazard.tc_tracks import TCTracks as TCTracks_type
-from process.utils import str2list_for_year
+from process.utils import str2list_for_year, create_climada_petal_year_range
 from os import remove
 from process import LANDSLIDE_DATA, TC_DATA, FLOOD_DATA, RISK_COUNTRY, FUTURE_YEARS
 from geopandas import read_file
 from process.climada_petals.landslide import Landslide
 from pickle import load as pickle_load
 from climada.util.api_client import Client
-from process import INVALID_KEY
+from process import RCP_ADJUSTMENT
 from climada.hazard import Hazard
+from numpy import ones as numpy_ones
 
 def get_hazard(
-    hazard_cfg: dict, 
-    future_hazard_para: dict or None or str = INVALID_KEY, 
-    task_type: str = "impact", 
-    tc_data_cfg: dict = TC_DATA) -> dict:
+    hazard_cfg: dict,
+    task_type: str = "impact") -> dict:
     """Get hazard for climaterisk
 
     Args:
         hazard_cfg (dict): Hazard configuration
+        task_type (str): task type, e.g., impact etc.
 
     Raises:
-        Exception: _description_
+        Exception: hazard is not supported
 
     Returns:
         dict: Hazard information
@@ -39,15 +39,7 @@ def get_hazard(
 
         if proc_hazard_name == "TC":
             
-            if task_type == "impact":
-                hazards[proc_hazard_name] = get_tc(
-                    tc_type="track", future_hazard_para=future_hazard_para, tc_data_cfg=tc_data_cfg)
-            elif task_type == "cost_benefit":
-                hazards[proc_hazard_name] = get_tc(
-                    tc_type="wind", future_hazard_para=future_hazard_para, tc_data_cfg=tc_data_cfg)
-            elif task_type == "supplychain":
-                hazards[proc_hazard_name] = get_tc(
-                    tc_type="track2", future_hazard_para=future_hazard_para, tc_data_cfg=tc_data_cfg)
+            hazards[proc_hazard_name] = get_tc(get_tc_type(task_type), proc_hazard_cfg["cfg"])
 
         elif proc_hazard_name == "landslide":
 
@@ -63,69 +55,111 @@ def get_hazard(
     return hazards
 
 
-def get_tc(tc_type: str, future_hazard_para: dict or None = None, smooth_factor: float = 0.5, tc_data_cfg: dict = TC_DATA) -> dict:
-    """Get TC from a certain provider
+def get_tc_type(task_type: str) -> str:
+    """Get TC type based on task
+
+    Args:
+        task_type (str): task name, e.g., impact
 
     Returns:
-        _type_: _description_
+        str: tc type, e.g., wind and track
     """
+    if task_type in ["impact", "cost_benefit"]:
+        tc_type = "wind"
+    elif task_type == "supplychain":
+        tc_type = "track"
+    
+    return tc_type
+
+
+def get_tc(
+    tc_type: str, 
+    tc_data_cfg: dict, 
+    dataset_name: str = "tropical_cyclone",
+    nb_synth_tracks: str = "10") -> dict:
+    """Get TC from ClimateRisk Petal client
+    
+    Args:
+        tc_type (str): whether it's wind or track
+        tc_data_cfg (dict): data configuration, e.g.,
+            {
+                climate_scenario: historical
+                country_name:
+                    - New Zealand
+                years: 1980_2020
+            }
+
+    Returns:
+        dict: the dict contains TC winds or tracks
+    """
+
+    def _create_tc_cfg(climate_scenario: str, years: str) -> dict:
+        """Create TC configuration
+
+        Args:
+            climate_scenario (str): climate scenario, 
+                e.g., rcp26, rcp45, rcp60 or historical
+            years (str): years to be processed, e.g.,
+                - for historical data: set a range such as "1980_2020"
+                - for projection data, set a number within the range (2040, 2060 and 2080)
+
+        Returns:
+            dict: TC configuration
+        """
+        properties = {
+            "climate_scenario": climate_scenario,
+            "nb_synth_tracks": nb_synth_tracks
+        }
+
+        if climate_scenario != "historical":
+            properties["ref_year"] = str(years)
+        
+        return properties
+
+    client = Client()
 
     if tc_type == "track":
 
-        hazard_hist = TCTracks.from_ibtracs_netcdf(
-            provider=tc_data_cfg["track"]["provider"], 
-            year_range=str2list_for_year(tc_data_cfg["track"]["year_range"]), 
-            estimate_missing=True)
-
-        hazard_hist.equal_timestep(smooth_factor)
-
-        if tc_data_cfg["track"]["pert_tracks"] > 0:
-            hazard_hist.calc_perturbed_trajectories(
-                nb_synth_tracks=tc_data_cfg["track"]["pert_tracks"])
-
-        hazard_future = None
-
-    elif tc_type == "track2":
-
-        client = Client()
-
         hazard_hist = Hazard.concat(
             [client.get_hazard(
-                "tropical_cyclone",
+                dataset_name,
                 properties={
                     "country_name": country,
-                    "climate_scenario": "historical",
-                    "nb_synth_tracks": "10"}) for country in tc_data_cfg["countries"]])
-
-        hazard_future = None
+                    "climate_scenario": tc_data_cfg["climate_scenario"],
+                    "nb_synth_tracks": nb_synth_tracks}) for country in tc_data_cfg["country_name"]])
 
     elif tc_type == "wind":
 
-        client = Client()
-
-        hazard_hist = client.get_hazard(
-            "tropical_cyclone",
-            properties={
-                "country_name": RISK_COUNTRY,
-                "climate_scenario": "historical",
-                "nb_synth_tracks": str(tc_data_cfg["wind"]["pert_tracks"])
-            }
+        properties = _create_tc_cfg(
+            tc_data_cfg["climate_scenario"],
+            tc_data_cfg["years"]
         )
 
-        if future_hazard_para is INVALID_KEY:
-            hazard_future = None
-        else:
-            hazard_future = client.get_hazard(
-                "tropical_cyclone",
-                properties={
-                    "country_name": RISK_COUNTRY,
-                    "climate_scenario": "rcp45",
-                    "ref_year": str(FUTURE_YEARS),
-                    "nb_synth_tracks": str(TC_DATA["wind"]["pert_tracks"])})
-            if future_hazard_para is not None:
-                hazard_future.intensity = hazard_hist.intensity * (1.0 + future_hazard_para)
+        hazards = []
+        for proc_country in tc_data_cfg["country_name"]:
+            properties["country_name"] = proc_country
+            hazards.append(
+                client.get_hazard(
+                    dataset_name,
+                    properties=properties)
+            )
+    
+        hazard_hist = Hazard.concat(hazards)
 
-    return {"hist": hazard_hist, "future": hazard_future}
+        if tc_data_cfg["climate_scenario"] == "historical":
+            hazard_hist = hazard_hist.select(
+                date=create_climada_petal_year_range(tc_data_cfg["years"]))
+        else:
+            hazard_hist.intensity *= RCP_ADJUSTMENT["tc_wind"][tc_data_cfg["climate_scenario"]]
+    
+    if tc_data_cfg["use_total"]:
+
+        if tc_data_cfg["climate_scenario"] != "historical":
+            raise Exception("use_total cannot be applied to climate scenario other than historical")
+
+        hazard_hist.frequency = numpy_ones(len(hazard_hist.frequency))
+
+    return hazard_hist
 
 
 def get_landslide(

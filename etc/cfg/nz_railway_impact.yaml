@@ -7,13 +7,24 @@ input:
     gdp2asset: null
     fix: null
 
+# -------------------------------------------
+# Set up hazard types:
+#   There are three types: flood, landslide and TC
+#   - enable: if use this hazard type:
+#   - year_range:
+#      * for historical data: set a range such as "2012-2020"
+#      * for projection data, set a number within the range (2040, 2060 and 2080)
+# -------------------------------------------
 hazard:
   flood:
     enable: False
+    year_range: null 
   landslide:
     enable: False
+    year_range: null 
   TC:
     enable: True
+    year_range: null 
 
 vis:
   basemap: etc/data/nz_coastlines/nz-coastlines-and-islands-polygons-topo-150k.shp

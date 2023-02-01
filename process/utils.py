@@ -9,6 +9,29 @@ from geopandas import read_file as geopandas_read_file
 from geopandas.geodataframe import GeoDataFrame
 from numpy import NaN, nanmin, nanmax
 
+
+def create_climada_petal_year_range(year_range_str: str or None) -> tuple:
+    """Convert year range from str (e.g., 2011-2012) to a tuple
+        (e.g., (2011-01-01, 2012-01-01))
+
+    Args:
+        year_range_str (str): year range in a string
+
+    Returns:
+        tuple: tuple for year range
+    """
+    if year_range_str is None:
+        return None
+
+    year_start = year_range_str[0:4]
+    year_end = year_range_str[5:]
+
+    return (
+        f"{year_start}-01-01",
+        f"{year_end}-01-01",
+    )
+
+
 def str2list_for_year(str_input: str or None) -> list:
     """Convert str (e.g., 2011-2012) to a list (e.g., [2011, 2012])
 
@@ -62,10 +85,7 @@ def get_hazard_info(impf_set: impact_func_set) -> dict:
     [haz_type] = impf_set.get_hazard_types()
     [haz_id] = impf_set.get_ids()[haz_type]
 
-    return {
-        "haz_type": haz_type,
-        "haz_id": haz_id
-    }
+    return {"haz_type": haz_type, "haz_id": haz_id}
 
 
 def read_cfg(cfg_path: str) -> dict:
@@ -79,8 +99,9 @@ def read_cfg(cfg_path: str) -> dict:
     """
     with open(cfg_path, "r") as fid:
         cfg = safe_load(fid)
-    
+
     return cfg
+
 
 def check_exposure_value(value_adjustment_option: dict) -> bool:
     """Make sure exposure value adjutsment is right
@@ -102,12 +123,16 @@ def check_exposure_value(value_adjustment_option: dict) -> bool:
             total_true += 1
 
     if total_true > 1:
-        raise Exception("More than 1 value adjustments (fix, litpop, gdp2asset) is set to True")
+        raise Exception(
+            "More than 1 value adjustments (fix, litpop, gdp2asset) is set to True"
+        )
 
     return True
 
 
-def get_exposure_range(exp_obj_gdf: GeoDataFrame, min_ratio: float = 0.75, max_ratio: float = 1.2) -> dict:
+def get_exposure_range(
+    exp_obj_gdf: GeoDataFrame, min_ratio: float = 0.75, max_ratio: float = 1.2
+) -> dict:
     """Get range to be plotted
 
     Args:
@@ -122,5 +147,5 @@ def get_exposure_range(exp_obj_gdf: GeoDataFrame, min_ratio: float = 0.75, max_r
     all_values = exp_obj_gdf.value.values
     return {
         "min": min_ratio * nanmin(all_values),
-        "max": max_ratio * nanmax(all_values)
+        "max": max_ratio * nanmax(all_values),
     }

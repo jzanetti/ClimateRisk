@@ -145,8 +145,7 @@ def update_exposure(
     impacts: dict,
     hazards: dict,
     exp_flag: str = "hist",
-    task_type: str = "impact",
-    use_all_years: bool = False,
+    task_type: str = "impact"
 ) -> dict:
     """Combining Exposure with Impact function
 
@@ -168,20 +167,19 @@ def update_exposure(
         if hazard_name == "TC":
 
             if task_type == "impact":
-                update_hazard = TropCyclone.from_tracks(
-                    hazards[hazard_name][exp_flag],
-                    centroids=gdf2centroids(exposure_obj.gdf),
-                )
-                if use_accum:
-                    update_hazard.frequency = numpy_ones(len(update_hazard.frequency))
+                update_hazard = hazards[hazard_name]
+                # update_hazard = TropCyclone.from_tracks(
+                #    hazards[hazard_name][exp_flag],
+                #    centroids=gdf2centroids(exposure_obj.gdf),
+                # )
 
             elif task_type == "supplychain":
-                update_hazard = hazards[hazard_name][exp_flag]
+                update_hazard = hazards[hazard_name]
             elif task_type == "cost_benefit":
-                update_hazard = hazards[hazard_name][exp_flag]
+                update_hazard = hazards[hazard_name]
 
         elif hazard_name in ["landslide", "flood"]:
-            update_hazard = hazards[hazard_name][exp_flag]
+            update_hazard = hazards[hazard_name]
 
         else:
             raise Exception(f"Hazard {hazard_name} is not supported yet ...")
@@ -190,7 +188,7 @@ def update_exposure(
             "exposure": exposure_obj,
             "impact": impacts[hazard_name],
             "updated_hazard": update_hazard,
-            "hazard": hazards[hazard_name][exp_flag],
+            "hazard": hazards[hazard_name],
         }
 
     return outputs
