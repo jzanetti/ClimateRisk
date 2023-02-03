@@ -38,10 +38,21 @@ CMAP = {"exposure": "jet"}
 # ------------------
 # RCP assumptions
 # ------------------
-RCP_ADJUSTMENT = {
-    "tc_wind": {
-        "rcp26": 1.2,
-        "rcp45": 1.5,
-        "rcp60": 1.8,
-    }
+RCP_CFG = {
+    "rcp26": {
+        "events_num_incre": 0.01,
+        "frequency_incre": 0.01,
+        "intensity_incre": 0.015,
+    },
+    "rcp45": {
+        "events_num_incre": 0.03,
+        "frequency_incre": 0.03,
+        "intensity_incre": 0.03,
+    },
+    "rcp60": {
+        "events_num_incre": 0.05,
+        "frequency_incre": 0.04,
+        "intensity_incre": 0.05,
+    },
 }
+HAZARD_CHCHE_DIR = "etc/data/cache"

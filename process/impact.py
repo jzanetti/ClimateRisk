@@ -30,7 +30,8 @@ def get_impact(hazard_cfg: dict) -> dict:
         impf_set[proc_hazard_name] = ImpactFuncSet()
 
         if proc_hazard_name == "TC":
-            proc_func = ImpfTropCyclone.from_emanuel_usa(v_thresh=12.5, v_half=30.0)
+            # proc_func = ImpfTropCyclone.from_emanuel_usa(v_thresh=12.5, v_half=30.0)
+            proc_func = ImpfTropCyclone.from_emanuel_usa()
 
         elif proc_hazard_name == "landslide":
             proc_func = landslide_impact_func()

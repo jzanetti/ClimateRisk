@@ -3,9 +3,11 @@ name: nz_railway
 input:
   file: etc/data/lds-nz-railway-centre-lines-SHP/nz-railway-centre-lines.shp
   value_adjustment_option: 
-    litpop: true
+    litpop: false
     gdp2asset: null
-    fix: null
+    fix:
+        method: total # individual or total
+        value: 2100000000 # 2100000000 or 1.0 # $2.1 billion
 
 # -------------------------------------------
 # Set up hazard types:
@@ -24,7 +26,12 @@ hazard:
     year_range: null 
   TC:
     enable: True
-    year_range: null 
+    cfg:
+      climate_scenario: rcp60
+      country_name:
+        - New Zealand
+      years: null
+      use_total: true
 
 vis:
   basemap: etc/data/nz_coastlines/nz-coastlines-and-islands-polygons-topo-150k.shp
@@ -33,7 +40,7 @@ vis:
     fontsize: 25.0
     extent: null
   exposure:
-    enable: True
+    enable: False
   hazard:
     enable: False
   impact:

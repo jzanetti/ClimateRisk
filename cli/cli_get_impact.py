@@ -45,7 +45,7 @@ def setup_parser():
         #    "--workdir",
         #    "/tmp/climaterisk",
         #    "--cfg",
-        #    "etc/cfg/nz_state_highway_impact_hist.yaml",
+        #    "etc/cfg/wellington_metlink_routes_impact.yaml",
         # ]
     )
 
@@ -64,7 +64,7 @@ def get_data():
     exp_obj = get_exposure(cfg["input"])
 
     print("Get hazard ...")
-    hazards = get_hazard(cfg["hazard"])
+    hazards = get_hazard(cfg["name"], cfg["hazard"])
 
     print("Obtain impact based on hazard...")
     impacts = get_impact(cfg["hazard"])
@@ -76,7 +76,13 @@ def get_data():
     exp_objs = calculate_impact_func(exp_objs)
 
     print("Visualization ...")
-    plot_wrapper(cfg, workdir, exp_objs)
+    plot_wrapper(
+        cfg,
+        workdir,
+        exp_objs,
+        # tag=proc_year,
+        # title=f"Accumulated impact cost (asset baseline as 1.0), rcp45, {proc_year}",
+    )
 
 
 if __name__ == "__main__":

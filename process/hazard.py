@@ -1,18 +1,22 @@
-from climada.hazard import TCTracks
-from process.vis import plot_tc
-from climada.hazard.tc_tracks import TCTracks as TCTracks_type
-from process.utils import str2list_for_year, create_climada_petal_year_range
+
 from os import remove
-from process import LANDSLIDE_DATA, TC_DATA, FLOOD_DATA, RISK_COUNTRY, FUTURE_YEARS
-from geopandas import read_file
-from process.climada_petals.landslide import Landslide
+from os.path import exists, join
+from pickle import dump as pickle_dump
 from pickle import load as pickle_load
-from climada.util.api_client import Client
-from process import RCP_ADJUSTMENT
+
 from climada.hazard import Hazard
+from climada.util.api_client import Client
+from geopandas import read_file
 from numpy import ones as numpy_ones
 
+from process import FLOOD_DATA, HAZARD_CHCHE_DIR, LANDSLIDE_DATA, RISK_COUNTRY
+from process.climada_petals.landslide import Landslide
+from process.pred import tc_pred
+from process.utils import create_climada_petal_year_range
+
+
 def get_hazard(
+    job_name: str,
     hazard_cfg: dict,
     task_type: str = "impact") -> dict:
     """Get hazard for climaterisk
@@ -39,7 +43,7 @@ def get_hazard(
 
         if proc_hazard_name == "TC":
             
-            hazards[proc_hazard_name] = get_tc(get_tc_type(task_type), proc_hazard_cfg["cfg"])
+            hazards[proc_hazard_name] = get_tc(job_name, get_tc_type(task_type), proc_hazard_cfg["cfg"])
 
         elif proc_hazard_name == "landslide":
 
@@ -73,7 +77,8 @@ def get_tc_type(task_type: str) -> str:
 
 
 def get_tc(
-    tc_type: str, 
+    job_name: str,
+    tc_type: str,
     tc_data_cfg: dict, 
     dataset_name: str = "tropical_cyclone",
     nb_synth_tracks: str = "10") -> dict:
@@ -93,34 +98,11 @@ def get_tc(
         dict: the dict contains TC winds or tracks
     """
 
-    def _create_tc_cfg(climate_scenario: str, years: str) -> dict:
-        """Create TC configuration
-
-        Args:
-            climate_scenario (str): climate scenario, 
-                e.g., rcp26, rcp45, rcp60 or historical
-            years (str): years to be processed, e.g.,
-                - for historical data: set a range such as "1980_2020"
-                - for projection data, set a number within the range (2040, 2060 and 2080)
-
-        Returns:
-            dict: TC configuration
-        """
-        properties = {
-            "climate_scenario": climate_scenario,
-            "nb_synth_tracks": nb_synth_tracks
-        }
-
-        if climate_scenario != "historical":
-            properties["ref_year"] = str(years)
-        
-        return properties
-
     client = Client()
 
     if tc_type == "track":
 
-        hazard_hist = Hazard.concat(
+        hazard_all = Hazard.concat(
             [client.get_hazard(
                 dataset_name,
                 properties={
@@ -130,36 +112,44 @@ def get_tc(
 
     elif tc_type == "wind":
 
-        properties = _create_tc_cfg(
-            tc_data_cfg["climate_scenario"],
-            tc_data_cfg["years"]
-        )
+        climate_scenario = tc_data_cfg["climate_scenario"]
 
-        hazards = []
-        for proc_country in tc_data_cfg["country_name"]:
-            properties["country_name"] = proc_country
-            hazards.append(
-                client.get_hazard(
-                    dataset_name,
-                    properties=properties)
-            )
-    
-        hazard_hist = Hazard.concat(hazards)
+        hazard_file = join(HAZARD_CHCHE_DIR, f"{tc_type}_{job_name}_{climate_scenario}.p")
 
-        if tc_data_cfg["climate_scenario"] == "historical":
-            hazard_hist = hazard_hist.select(
-                date=create_climada_petal_year_range(tc_data_cfg["years"]))
-        else:
-            hazard_hist.intensity *= RCP_ADJUSTMENT["tc_wind"][tc_data_cfg["climate_scenario"]]
+        if not exists(hazard_file):
+
+            print(f"not able to find {hazard_file}, creating a new hazard type")
+
+            hazards = []
+            for proc_country in tc_data_cfg["country_name"]:
+                hazards.append(
+                    client.get_hazard(
+                        dataset_name,
+                        properties={
+                            "country_name": proc_country,
+                            "climate_scenario": "historical",
+                            "nb_synth_tracks": nb_synth_tracks
+                        })
+                )
+
+            hazard_all = Hazard.concat(hazards)
+
+            if climate_scenario != "historical":
+                hazard_pred = tc_pred(hazard_all, range(2021, 2081), climate_scenario)
+                hazard_all = Hazard.concat([hazard_all] + hazard_pred)
+
+            pickle_dump({"hazard": hazard_all}, open(hazard_file, "wb"))
+
+        hazard_all = pickle_load(open(hazard_file, "rb"))["hazard"]
+
+        hazard_all = hazard_all.select(
+            date=create_climada_petal_year_range(tc_data_cfg["years"]))
+
     
     if tc_data_cfg["use_total"]:
+        hazard_all.frequency = numpy_ones(len(hazard_all.frequency))
 
-        if tc_data_cfg["climate_scenario"] != "historical":
-            raise Exception("use_total cannot be applied to climate scenario other than historical")
-
-        hazard_hist.frequency = numpy_ones(len(hazard_hist.frequency))
-
-    return hazard_hist
+    return hazard_all
 
 
 def get_landslide(

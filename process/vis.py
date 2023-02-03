@@ -118,9 +118,7 @@ def plot_cost_benefit_wrapper(
         close()
 
 
-def plot_wrapper(
-    cfg: dict, workdir: str, exp_objs: dict, **kwargs
-):
+def plot_wrapper(cfg: dict, workdir: str, exp_objs: dict, **kwargs):
     """Plot wrapper
 
     Args:
@@ -151,6 +149,7 @@ def plot_wrapper(
                 )
 
         if proc_vis_name == "impact":
+
             for hazard_name in exp_objs:
 
                 plot_impact(
@@ -270,7 +269,7 @@ def plot_impact(
         basemap.plot(ax=ax, color="white", edgecolor="black")
 
     vrange = get_exposure_range(impact_obj._build_exp().gdf)
-    vrange = {"min": 0, "max": 0.75e8}
+    vrange = {"min": 0, "max": 3.0}
 
     if isinstance(extent, str):
         extent = eval(extent)
@@ -290,7 +289,12 @@ def plot_impact(
     if "title" in other_cfg:
         ax.set_title(other_cfg["title"])
 
-    savefig(join(workdir, f"impact_{hazard_name}.png"), bbox_inches="tight", dpi=200)
+    if "tag" in other_cfg:
+        filename = f"impact_{hazard_name}_{other_cfg['tag']}.png"
+    else:
+        filename = f"impact_{hazard_name}.png"
+
+    savefig(join(workdir, filename), bbox_inches="tight", dpi=200)
     close()
 
     freq_curve_obj.plot()
