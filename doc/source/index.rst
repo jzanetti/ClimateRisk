@@ -19,7 +19,7 @@ Additional New Zealand specifications have been added with a range of options fo
 .. |pic3| image:: img/accumulated_impact_costs_TC4.gif
    :width: 30%
 
-*(left: accumulated impact costs (between 1980 and 2080) from rcp45 for the state highway, with a total of estimated state highway asset value of $52b; middle: accumulated impact costs (between 1980 and 2080) from rcp45 for the national railway, with a total of estimated state highway asset value of $2.1b; right: accumulated impact costs (between 1980 and 2080) from rcp45 for Metlink, the normalized asset value 1.0 is used)*
+*(left: accumulated impact costs (between 1980 and 2080) from rcp45 for the state highway, with a total of estimated state highway asset value of $52b; middle: accumulated impact costs (between 1980 and 2080) from rcp45 for the national railway, with a total asset value of $2.1b; right: accumulated impact costs (between 1980 and 2080) from rcp45 for Metlink, the normalized asset value 1.0 is used)*
 
 .. note::
 
